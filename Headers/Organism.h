@@ -12,6 +12,7 @@
 /* Object representing clique in algorithm
     consists of:
         - set of vertices representing clique approximation.
+        - procedure mutating the clique(adding new vertex/replacing one)
  */
 
 class Organism {
