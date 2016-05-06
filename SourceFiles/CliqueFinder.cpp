@@ -13,7 +13,7 @@ Organism CliqueFinder::crossOver(Organism &a,Organism &b) {
  */
 std::vector<int> CliqueFinder::randPerm(unsigned int size) {
     std::vector<int> perm;
-    for(int i=0;i<graph.vertexAmount;i++){
+    for(int i=0;i<graph->vertexAmount;i++){
         perm.push_back(i);
     }
     std::random_shuffle(perm.begin(),perm.end());
@@ -24,17 +24,41 @@ std::vector<int> CliqueFinder::randPerm(unsigned int size) {
  * Tournament selection of Organisms
  */
 void CliqueFinder::selection(std::vector<Organism> currentPop,std::vector<Organism> newPop) {
-    //TODO implementing selection
+    //TODO implementing  tournament selection
 }
 /*
  * Next step of algorithm, doing selection, mutations, crossing over and replaces population;
  */
 void CliqueFinder::nextGeneration() {
+    //No crossing at this moment
     std::vector<Organism> newPop;
+    selection(population,newPop);
+    for(int i=0;i<newPop.size();i++){
+        double z = rand()%RAND_MAX;
+        if(z < pMut){
+            newPop[i].mutate();
+        }
+    }
     //TODO implement methods
     this->population = newPop;
+
 }
 int CliqueFinder::GetWorth(std::vector<Organism> pop) {
     //TODO implement Bron-Kerbosch algorithm for clique number
     return 0;
 }
+
+CliqueFinder::CliqueFinder(const Graph &g,int startAmount,unsigned int startSize) {
+    this->graph = &g;
+    std::vector<int> perm;
+    Organism tempOrg;
+    for(int i=0;i<startAmount;i++){
+        perm = randPerm((startSize));
+        for(int j = 0;j<perm.size();j++){
+            tempOrg.vertices.insert(perm[j]);
+        }
+        population.push_back(tempOrg);
+    }
+}
+
+

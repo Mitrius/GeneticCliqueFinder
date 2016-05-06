@@ -17,9 +17,10 @@ public:
     void selection(std::vector<Organism> currentPop,std::vector<Organism> newPop);
     void nextGeneration();
     std::vector<Organism> population;
-    Graph graph;
+    const Graph* graph;
     int CliqueFeat = 0;
     double pMut = 0.4;
+    CliqueFinder(const Graph &g,int startAmount,unsigned int startSize);
 
 
 };
