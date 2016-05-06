@@ -12,8 +12,6 @@
 /* Object representing clique in algorithm
     consists of:
         - set of vertices representing clique approximation.
-        - int representing the probability of organism mutation.
-        - int representing feat of the clique
  */
 
 class Organism {
