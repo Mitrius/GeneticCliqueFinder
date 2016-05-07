@@ -11,10 +11,9 @@
 
 /* Object representing clique in algorithm
     consists of:
-        - set of vertices representing clique approximation.
+        - set of vertices representing clique approximation(vertices are represented by their ID).
         - procedure mutating the clique(adding new vertex/replacing one)
  */
-
 class Organism {
 public:
     void mutate();

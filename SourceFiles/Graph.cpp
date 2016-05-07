@@ -6,7 +6,7 @@ void Graph::combineGraph(const std::vector<std::vector <std::string> > &edgeList
 ,const std::vector<std::vector<bool> > &feats ){
     std::string currentId;
     Vertex tempVert;
-    assert(vertexAmount == feats.size());
+    assert(vertexAmount == feats.size()); //Sanity check
     for(int i=0;i<vertexAmount;i++){
         tempVert.id = i;
         tempVert.feats.clear();
@@ -36,7 +36,7 @@ void Graph::combineGraph(const std::vector<std::vector <std::string> > &edgeList
 Graph::Graph(const std::string fileName){
     std::ifstream inputStream;
     std::vector<std::vector<std::string> > edgeList;
-    std::vector<std::vector<bool > > feats;
+    std::vector<std::vector<bool> > feats;
     std::vector<std::string> idArray;
     std::string truncFilename;
     /*
@@ -82,10 +82,22 @@ Graph::Graph(const std::string fileName){
      */
     inputStream.open(truncFilename.c_str());
     assert(inputStream.good());
+    line = "";
     std::vector<std::string> edge(2);
     while(inputStream.peek()!= EOF){
-        inputStream >> edge[0];
-        inputStream >> edge[1];
+        std::getline(inputStream,line,'\n');
+        int i = 0;
+        edge[0] = "";
+        edge[1] = "";
+        while(line[i] !=' '){
+            edge[0] += line[i];
+            i++;
+        }
+        i++;
+        while(i<line.size()){
+            edge[1] += line[i];
+            i++;
+        }
         edgeList.push_back(edge);
     }
     inputStream.close();

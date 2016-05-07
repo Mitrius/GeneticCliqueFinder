@@ -43,7 +43,7 @@ void CliqueFinder::nextGeneration() {
     this->population = newPop;
 
 }
-int CliqueFinder::GetWorth(std::vector<Organism> pop) {
+int CliqueFinder::getWorth(std::vector<Organism> pop) {
     //TODO implement Bron-Kerbosch algorithm for clique number
     return 0;
 }
