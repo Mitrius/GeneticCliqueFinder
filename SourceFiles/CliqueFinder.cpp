@@ -54,7 +54,8 @@ CliqueFinder::CliqueFinder(const Graph &g,int startAmount,unsigned int startSize
     Organism tempOrg;
     for(int i=0;i<startAmount;i++){
         perm = randPerm((startSize));
-        for(int j = 0;j<perm.size();j++){
+        tempOrg.vertices.clear();
+        for(int j = 0;j<perm.size();j++) {
             tempOrg.vertices.insert(perm[j]);
         }
         population.push_back(tempOrg);

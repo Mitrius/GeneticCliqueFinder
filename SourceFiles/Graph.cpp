@@ -2,6 +2,8 @@
 #include <cassert>
 #include <iostream>
 #include <algorithm>
+#include <ctime>
+
 #include "../Headers/Graph.h"
 void Graph::combineGraph(const std::vector<std::vector <std::string> > &edgeList,const std::vector<std::string> &idArray
 ,const std::vector<std::vector<bool> > &feats ){
@@ -40,10 +42,13 @@ Graph::Graph(const std::string fileName){
     std::vector<std::vector<bool> > feats;
     std::vector<std::string> idArray;
     std::string truncFilename;
+    time_t finishTime = 0;
+    time_t start;
     /*
     * Load feats from filename.feats file feat look like that:
     * vertex feat1(1/0) feat2(1/0) ... \n
     */
+    start = time(0);
     truncFilename  = fileName;
     truncFilename+=  ".feat";
     inputStream.open(truncFilename.c_str());
@@ -125,7 +130,10 @@ Graph::Graph(const std::string fileName){
         }
         featDescriptorArray.push_back(inputString);
     }
+    finishTime = time(0);
     inputStream.close();
+    std::cout<<"Graph has been created with: "<<vertexAmount<<" vertices, in: "<<difftime(finishTime,start)<<
+            "seconds"<<std::endl;
 
 }
 /*
