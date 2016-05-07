@@ -1,6 +1,7 @@
 #include <fstream>
 #include <cassert>
 #include <iostream>
+#include <algorithm>
 #include "../Headers/Graph.h"
 void Graph::combineGraph(const std::vector<std::vector <std::string> > &edgeList,const std::vector<std::string> &idArray
 ,const std::vector<std::vector<bool> > &feats ){
@@ -127,5 +128,20 @@ Graph::Graph(const std::string fileName){
     inputStream.close();
 
 }
+/*
+ * Method checking the existence of edge between two vertices, and feat compability
+ */
+bool Graph::isEdge(int id1, int id2, int feat) {
+    if( std::find(vertices[id1].neighbourhood.begin(),vertices[id1].neighbourhood.end(),id2)
+        != vertices[id1].neighbourhood.end()){
+        if(std::find(vertices[id2].feats.begin(),vertices[id2].feats.end(),feat)
+           != vertices[id2].feats.end()){
+                return true;
+        }
+    }
+    return false;
+}
+
+
 
 
