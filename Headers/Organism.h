@@ -16,7 +16,7 @@
  */
 class Organism {
 public:
-    void mutate();
+    void mutate(int vertexAmount);
     std::set<int> vertices;
 private:
 

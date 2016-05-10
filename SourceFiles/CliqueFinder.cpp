@@ -3,10 +3,9 @@
 #include <fstream>
 #include <iostream>
 
-Organism CliqueFinder::crossOver(Organism &a,Organism &b) {
+void CliqueFinder::crossOver(std::vector<Organism> &pop) {
     Organism child;
     //TODO crossing two organisms(gets half of unique vertices from one, and half from second)
-    return child;
 }
 /*
  * Generates random vertex permutation with given size
@@ -30,13 +29,14 @@ void CliqueFinder::selection(std::vector<Organism> currentPop,std::vector<Organi
  * Next step of algorithm, doing selection, mutations, crossing over and replaces population;
  */
 void CliqueFinder::nextGeneration() {
-    //No crossing at this moment
+
     std::vector<Organism> newPop;
     selection(population,newPop);
+    crossOver(newPop);
     for(int i=0;i<newPop.size();i++){
         double z = rand()%RAND_MAX;
         if(z < pMut){
-            newPop[i].mutate();
+            newPop[i].mutate(graph->vertexAmount);
         }
     }
     //TODO implement methods
@@ -62,6 +62,13 @@ CliqueFinder::CliqueFinder(const Graph &g, int startAmount, unsigned int startSi
     }
     cliqueFeat = feat;
 }
+
+std::vector<Organism> CliqueFinder::start() {
+    std::vector<Organism> bestClique;
+
+    return bestClique;
+}
+
 
 
 

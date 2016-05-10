@@ -8,18 +8,25 @@
  * Mutating the organism (it gets one new vertex) or one of his vertices gets replaced
  * Value "TRUE" of muType indicates new vertex
  */
-void Organism::mutate() {
+void Organism::mutate(int vertexAmount) {
         bool muType = (bool) (rand() % 2);
         if(muType){
-            //TODO adding another vertex
+            int sizePre = (int) vertices.size();
+            int newVert;
+            while (vertices.size() == sizePre) {
+                newVert = rand() % vertexAmount;
+                vertices.insert(newVert);
+            }
         }
         else{
             int sizePre = (int) vertices.size();
             int replaced = (int) (rand() % vertices.size());
-            /* while(vertices.size() > sizePre){
-
-             }*/
-            //TODO replacing one of the vertices
+            int replacing;
+            while (vertices.size() == sizePre) {
+                replacing = rand() % vertexAmount;
+                vertices.insert(replacing);
+            }
+            vertices.erase(replaced);
         }
 }
 
