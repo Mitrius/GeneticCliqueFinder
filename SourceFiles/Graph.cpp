@@ -45,7 +45,7 @@ Graph::Graph(const std::string fileName){
     time_t finishTime = 0;
     time_t start;
     /*
-    * Load feats from filename.feats file feat look like that:
+    * Loads feats from filename.feats file feat look like that:
     * vertex feat1(1/0) feat2(1/0) ... \n
     */
     start = time(0);

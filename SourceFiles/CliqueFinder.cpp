@@ -48,8 +48,8 @@ int CliqueFinder::getWorth(std::vector<Organism> pop) {
     return 0;
 }
 
-CliqueFinder::CliqueFinder(const Graph &g,int startAmount,unsigned int startSize) {
-    this->graph = &g;
+CliqueFinder::CliqueFinder(const Graph &g, int startAmount, unsigned int startSize, int feat) {
+    graph = &g;
     std::vector<int> perm;
     Organism tempOrg;
     for(int i=0;i<startAmount;i++){
@@ -60,6 +60,8 @@ CliqueFinder::CliqueFinder(const Graph &g,int startAmount,unsigned int startSize
         }
         population.push_back(tempOrg);
     }
+    cliqueFeat = feat;
 }
+
 
 

@@ -5,6 +5,6 @@ int main() {
     std::string filename;
     std::cin>>filename;
     Graph graph(filename);
-    CliqueFinder finder(graph,10,2);
+    CliqueFinder finder(graph, 10, 2, 10);
     return 0;
 }

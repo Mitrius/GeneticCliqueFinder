@@ -19,7 +19,8 @@ public:
     const Graph* graph;
     int cliqueFeat = 0;
     double pMut = 0.4;
-    CliqueFinder(const Graph &g,int startAmount,unsigned int startSize);
+
+    CliqueFinder(const Graph &g, int startAmount, unsigned int startSize, int feat);
 };
 
 

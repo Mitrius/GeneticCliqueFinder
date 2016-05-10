@@ -14,6 +14,11 @@ void Organism::mutate() {
             //TODO adding another vertex
         }
         else{
+            int sizePre = (int) vertices.size();
+            int replaced = (int) (rand() % vertices.size());
+            /* while(vertices.size() > sizePre){
+
+             }*/
             //TODO replacing one of the vertices
         }
 }
