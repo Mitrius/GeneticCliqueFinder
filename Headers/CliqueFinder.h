@@ -26,7 +26,7 @@ public:
     std::pair<Organism, int> start();
 
     CliqueFinder(const Graph &g, const int startAmount, const unsigned int startSize, const int feat,
-                 const int maxEpoch);
+                 const int desMaxEpoch);
 };
 
 

@@ -12,6 +12,7 @@ void CliqueFinder::crossOver(std::vector<Organism> &pop, const unsigned long chi
     Organism father;
     Organism mother;
     unsigned long chosenOrganism;
+    assert(pop.size() > 0);
     for (int i = 0; i < childrenAmount; i++) {
         child.vertices.clear();
         chosenOrganism = rand() % pop.size();
@@ -22,6 +23,7 @@ void CliqueFinder::crossOver(std::vector<Organism> &pop, const unsigned long chi
         child.vertices = father.vertices;
         child.vertices.insert(mother.vertices.begin(), mother.vertices.end());
         pop.push_back(father);
+        pop.push_back(child);//They grow soo fast after all
     }
 }
 /*
@@ -40,6 +42,7 @@ std::vector<int> CliqueFinder::randPerm(unsigned int size) {
  * Tournament selection of Organisms
  */
 void CliqueFinder::selection(std::vector<Organism> &currentPop, std::vector<Organism> &newPop) {
+    //TODO implement tournament selection
     newPop = currentPop;
 }
 /*
@@ -57,16 +60,20 @@ void CliqueFinder::nextGeneration() {
         }
     }
     //TODO implement methods
-    this->population = newPop;
-
+    population = newPop;
 }
+
+/*
+ *  edge is present where they're two graph vertices that are connected to each other and share clique feat
+    graph.isEdge method can be quite useful
+ */
 int CliqueFinder::getWorth(std::vector<Organism> pop) {
     //TODO implement Bron-Kerbosch algorithm for clique number
     return 0;
 }
 
 CliqueFinder::CliqueFinder(const Graph &g, const int startAmount, const unsigned int startSize, const int feat,
-                           const int maxEpoch) {
+                           const int desMaxEpoch) {
     graph = &g;
     std::vector<int> perm;
     Organism tempOrg;
@@ -79,9 +86,8 @@ CliqueFinder::CliqueFinder(const Graph &g, const int startAmount, const unsigned
         population.push_back(tempOrg);
     }
     cliqueFeat = feat;
-    this->maxEpoch = maxEpoch;
+    maxEpoch = desMaxEpoch;
 }
-
 /*
  * Main function of class, returning Best clique (organism, along with possible clique size);
  */
