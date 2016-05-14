@@ -30,6 +30,12 @@ void Organism::mutate(int vertexAmount) {
         }
 }
 
+bool Organism::operator<(const Organism &X) {
+    return worth < X.worth;
+}
+
+
+
 
 
 

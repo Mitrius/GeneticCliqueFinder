@@ -16,8 +16,12 @@
  */
 class Organism {
 public:
+
     void mutate(int vertexAmount);
+
+    bool operator<(const Organism &X);
     std::set<int> vertices;
+    int worth = 0;
 private:
 
 };

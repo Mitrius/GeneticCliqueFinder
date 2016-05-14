@@ -10,19 +10,23 @@
  */
 class CliqueFinder {
 public:
-    void crossOver(std::vector<Organism> &pop);
+    void crossOver(std::vector<Organism> &pop, unsigned long childrenAmount);
     int getWorth(std::vector<Organism> pop);
     std::vector<int> randPerm(unsigned int size);
-    void selection(std::vector<Organism> currentPop,std::vector<Organism> newPop);
+
+    void selection(std::vector<Organism> &currentPop, std::vector<Organism> &newPop);
     void nextGeneration();
     std::vector<Organism> population;
     const Graph* graph;
     int epoch = 0;
+    int maxEpoch;
     int cliqueFeat = 0;
     double pMut = 0.4;
 
-    std::vector<Organism> start();
-    CliqueFinder(const Graph &g, int startAmount, unsigned int startSize, int feat);
+    std::pair<Organism, int> start();
+
+    CliqueFinder(const Graph &g, const int startAmount, const unsigned int startSize, const int feat,
+                 const int maxEpoch);
 };
 
 
