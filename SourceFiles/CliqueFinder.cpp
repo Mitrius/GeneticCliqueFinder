@@ -41,17 +41,31 @@ std::vector<int> CliqueFinder::randPerm(unsigned int size) {
 /*
  * Tournament selection of Organisms
  */
-void CliqueFinder::selection(std::vector<Organism> &currentPop, std::vector<Organism> &newPop) {
-    //TODO implement tournament selection
-    newPop = currentPop;
+void CliqueFinder::selection(std::vector<Organism> &newPop) {
+    unsigned long TournAmount = newPop.size() / 2;
+    unsigned long cont1 = 0;
+    unsigned long cont2 = 0;
+    Organism tempOrg;
+    for (int i = 0; i < TournAmount; i++) {
+        cont1 = rand() % newPop.size();
+        tempOrg = newPop[cont1];
+        newPop.erase(newPop.begin() + cont1);
+        cont2 = rand() % newPop.size();
+        if (tempOrg.worth > newPop[cont2].worth) {
+            newPop.erase(newPop.begin() + cont2);
+            newPop.push_back(tempOrg);
+        }
+    }
 }
 /*
  * Next step of algorithm, doing selection, mutations, crossing over and replaces population;
  */
 void CliqueFinder::nextGeneration() {
-
     std::vector<Organism> newPop;
-    selection(population,newPop);
+    newPop = population;
+    for (auto f:newPop)
+        f.worth = getWorth(f);
+    selection(newPop);
     crossOver(newPop, population.size() - newPop.size());
     for(int i=0;i<newPop.size();i++){
         double z = rand()%RAND_MAX;
@@ -59,7 +73,6 @@ void CliqueFinder::nextGeneration() {
             newPop[i].mutate(graph->vertexAmount);
         }
     }
-    //TODO implement methods
     population = newPop;
 }
 
@@ -67,7 +80,7 @@ void CliqueFinder::nextGeneration() {
  *  edge is present where they're two graph vertices that are connected to each other and share clique feat
     graph.isEdge method can be quite useful
  */
-int CliqueFinder::getWorth(std::vector<Organism> pop) {
+int CliqueFinder::getWorth(Organism pop) {
     //TODO implement Bron-Kerbosch algorithm for clique number
     return 0;
 }

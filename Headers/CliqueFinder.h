@@ -11,10 +11,11 @@
 class CliqueFinder {
 public:
     void crossOver(std::vector<Organism> &pop, unsigned long childrenAmount);
-    int getWorth(std::vector<Organism> pop);
+
+    int getWorth(Organism pop);
     std::vector<int> randPerm(unsigned int size);
 
-    void selection(std::vector<Organism> &currentPop, std::vector<Organism> &newPop);
+    void selection(std::vector<Organism> &newPop);
     void nextGeneration();
     std::vector<Organism> population;
     const Graph* graph;
