@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <fstream>
 #include <iostream>
+#include <iterator>
 
 void CliqueFinder::crossOver(std::vector<Organism> &pop) {
     Organism child;
@@ -43,9 +44,29 @@ void CliqueFinder::nextGeneration() {
     this->population = newPop;
 
 }
-int CliqueFinder::getWorth(std::vector<Organism> pop) {
-    //TODO implement Bron-Kerbosch algorithm for clique number
-    return 0;
+int CliqueFinder::getWorth(Organism pop) {
+    std::set<int> x, na = pop.vertices, r;
+    return RyBKA(r, na, x);
+}
+int CliqueFinder::RyBKA(std::set<int> &r, std::set<int> &p, std::set<int> &x) {
+    if (p.size() == 0 && x.size() == 0) return r.size();
+    int cmax = -1;
+    std::set<int> nr, np, nx;
+    for (auto &t : p) {
+        nr = r;
+        np.clear();
+        nx.clear();
+        nr.insert(t);
+        for (auto &v : p) {
+            if (graph->isEdge(t, v, cliqueFeat) && graph->isEdge(v, t, cliqueFeat)) np.insert(v);
+        }
+        for (auto &v : x) {
+            if (graph->isEdge(t, v, cliqueFeat) && graph->isEdge(v, t, cliqueFeat)) np.insert(v);
+        }
+        int temp = RyBKA(nr, np, nx);
+        if (cmax < temp) cmax = temp;
+    }
+    return cmax;
 }
 
 CliqueFinder::CliqueFinder(const Graph &g, int startAmount, unsigned int startSize, int feat) {

@@ -11,7 +11,8 @@
 class CliqueFinder {
 public:
     void crossOver(std::vector<Organism> &pop);
-    int getWorth(std::vector<Organism> pop);
+    int getWorth(Organism pop);
+    int RyBKA(std::set<int> &r, std::set<int> &p, std::set<int> &x);
     std::vector<int> randPerm(unsigned int size);
     void selection(std::vector<Organism> currentPop,std::vector<Organism> newPop);
     void nextGeneration();
