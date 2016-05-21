@@ -8,7 +8,7 @@ Vertex::Vertex() {
 
 }
 bool Vertex::operator<(const Vertex &a) {
-    return this->id > a.id;
+    return id > a.id;
 }
 
 

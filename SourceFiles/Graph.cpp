@@ -52,7 +52,6 @@ Graph::Graph(const std::string fileName){
     truncFilename  = fileName;
     truncFilename+=  ".feat";
     inputStream.open(truncFilename.c_str());
-    int feat = 0;
     std::string line;
     std::string id;
     std::vector<bool> empty;
@@ -140,6 +139,8 @@ Graph::Graph(const std::string fileName){
  * Method checking the existence of edge between two vertices, and feat compability
  */
 bool Graph::isEdge(int id1, int id2, int feat) const {
+    if (id1 > vertices.size() || id2 > vertices.size())
+        return false;
     if( std::find(vertices[id1].neighbourhood.begin(),vertices[id1].neighbourhood.end(),id2)
         != vertices[id1].neighbourhood.end()){
         if(std::find(vertices[id2].feats.begin(),vertices[id2].feats.end(),feat)
