@@ -8,13 +8,15 @@ void toast(Graph g) {
     assert(!g.isEdge(3, 0, 0));//wrong direction
     assert(g.isEdge(5, 1, 1));
 
+
 }
 int main() {
+    srand((unsigned int) time(NULL));
     std::string filename;
     std::cin>>filename;
     Graph graph(filename);
     toast(graph);
-    CliqueFinder finder(graph, 10, 3, 1, 100);
-    finder.start();
+    CliqueFinder finder(graph, 10, 3, 1, 10);
+    auto res = finder.start();
     return 0;
 }

@@ -12,6 +12,7 @@ void CliqueFinder::crossOver(std::vector<Organism> &pop, const unsigned long chi
     Organism child;
     Organism father;
     Organism mother;
+    std::vector<Organism> children;
     unsigned long chosenOrganism;
     assert(pop.size() > 0);
     for (int i = 0; i < childrenAmount; i++) {
@@ -24,8 +25,9 @@ void CliqueFinder::crossOver(std::vector<Organism> &pop, const unsigned long chi
         child.vertices = father.vertices;
         child.vertices.insert(mother.vertices.begin(), mother.vertices.end());
         pop.push_back(father);
-        pop.push_back(child);//They grow soo fast after all
+        children.push_back(child);//They grow up soo fast after all
     }
+    pop.insert(pop.end(), children.begin(), children.end());
 }
 /*
  * Generates random vertex permutation with given size
@@ -39,22 +41,26 @@ std::vector<int> CliqueFinder::randPerm(unsigned int size) {
     perm.resize(size);
     return perm;
 }
+
 /*
- * Tournament selection of Organisms
+ * Tournament selection of organisms
  */
 void CliqueFinder::selection(std::vector<Organism> &newPop) {
-    unsigned long TournAmount = newPop.size() / 2;
-    unsigned long cont1 = 0;
-    unsigned long cont2 = 0;
-    Organism tempOrg;
+    unsigned long TournAmount = population.size() / 2;
+    unsigned long cont = 0;
+    Organism organism1, organism2;
     for (int i = 0; i < TournAmount; i++) {
-        cont1 = rand() % newPop.size();
-        tempOrg = newPop[cont1];
-        newPop.erase(newPop.begin() + cont1);
-        cont2 = rand() % newPop.size();
-        if (tempOrg.worth > newPop[cont2].worth) {
-            newPop.erase(newPop.begin() + cont2);
-            newPop.push_back(tempOrg);
+        cont = rand() % population.size();
+        organism1 = population[cont];
+        population.erase(population.begin() + cont);
+        cont = rand() % population.size();
+        organism2 = population[cont];
+        population.erase(population.begin() + cont);
+        if (organism1.worth > organism2.worth) {
+            newPop.push_back(organism1);
+        }
+        else {
+            newPop.push_back(organism2);
         }
     }
 }
@@ -63,11 +69,12 @@ void CliqueFinder::selection(std::vector<Organism> &newPop) {
  */
 void CliqueFinder::nextGeneration() {
     std::vector<Organism> newPop;
-    newPop = population;
+    int prevPopSize = (int) population.size();
     for (auto f:newPop)
         f.worth = getWorth(f);
     selection(newPop);
-    crossOver(newPop, population.size() - newPop.size());
+
+    crossOver(newPop, prevPopSize - newPop.size());
     for(int i=0;i<newPop.size();i++){
         double z = rand()%RAND_MAX;
         if(z < pMut){
@@ -99,6 +106,7 @@ int CliqueFinder::RyBKA(std::set<int> &r, std::set<int> &p, std::set<int> &x) {
         int temp = RyBKA(nr, np, nx);
         if (cmax < temp) cmax = temp;
     }
+    assert(cmax > 0);//still 0
     return cmax;
 }
 
