@@ -15,8 +15,9 @@ int main() {
     std::string filename;
     std::cin>>filename;
     Graph graph(filename);
-    toast(graph);
-    CliqueFinder finder(graph, 10, 3, 1, 10);
+    //toast(graph);
+    CliqueFinder finder(graph, 20, 10, 0, 100);
     auto res = finder.start();
+    std::cout << res.first.worth << std::endl;
     return 0;
 }

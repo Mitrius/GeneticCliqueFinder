@@ -70,10 +70,11 @@ void CliqueFinder::selection(std::vector<Organism> &newPop) {
 void CliqueFinder::nextGeneration() {
     std::vector<Organism> newPop;
     int prevPopSize = (int) population.size();
-    for (auto f:newPop)
-        f.worth = getWorth(f);
+    for (auto &f:population) {
+        int worth = getWorth(f);
+        f.worth = worth;
+    }
     selection(newPop);
-
     crossOver(newPop, prevPopSize - newPop.size());
     for(int i=0;i<newPop.size();i++){
         double z = rand()%RAND_MAX;
@@ -135,7 +136,9 @@ std::pair<Organism, int> CliqueFinder::start() {
         nextGeneration();
         epoch++;
     }
-    std::sort(population.begin(), population.end());
+    std::sort(population.begin(), population.end(), [](Organism a, Organism b) {
+        return a.worth > b.worth;
+    });
     int possibleCliqueSize = 0;
     for (const auto setItem:population[0].vertices) {
         if (std::find(graph->vertices[setItem].feats.begin(), graph->vertices[setItem].feats.end(), cliqueFeat) !=
