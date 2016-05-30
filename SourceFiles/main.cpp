@@ -1,4 +1,5 @@
 #include <iostream>
+#include <ctime>
 #include "../Headers/CliqueFinder.h"
 
 int main() {
