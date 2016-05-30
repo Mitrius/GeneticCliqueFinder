@@ -36,7 +36,8 @@ void Graph::combineGraph(const std::vector<std::vector <std::string> > &edgeList
     }
 
 }
-Graph::Graph(const std::string fileName){
+
+Graph::Graph(const std::string fileName) {
     std::ifstream inputStream;
     std::vector<std::vector<std::string> > edgeList;
     std::vector<std::vector<bool> > feats;
@@ -49,36 +50,36 @@ Graph::Graph(const std::string fileName){
     * vertex feat1(1/0) feat2(1/0) ... \n
     */
     start = time(0);
-    truncFilename  = fileName;
-    truncFilename+=  ".feat";
+    truncFilename = fileName;
+    truncFilename += ".feat";
     inputStream.open(truncFilename.c_str());
     std::string line;
     std::string id;
     std::vector<bool> empty;
     assert(inputStream.good());
-    while(inputStream.peek()!= EOF) {
+    while (inputStream.peek() != EOF) {
         empty.clear();
         id.clear();
 
         std::getline(inputStream, line, '\n');//'\n' przy getline to troche overkill ;)
         unsigned long i = 0;
 
-        while (line[i] != ' '){//extracting ID
+        while (line[i] != ' ') {//extracting ID
             id += line[i];
             i++;
         }
 
         idArray.push_back(id);
-        while(i < line.size()){
-                if (line[i] != ' ')
+        while (i < line.size()) {
+            if (line[i] != ' ')
                 empty.push_back((bool) (line[i] - 48));// 1/0, feat order persists
-                i++;
+            i++;
         }
         feats.push_back(empty);
     }
     inputStream.close();
-    truncFilename  = fileName;
-    truncFilename+=  ".edges";
+    truncFilename = fileName;
+    truncFilename += ".edges";
     vertexAmount = (int) feats.size();
     /*
      * Load edges from filename.edges file Edge looks like that:
@@ -89,24 +90,24 @@ Graph::Graph(const std::string fileName){
     assert(inputStream.good());
     line = "";
     std::vector<std::string> edge(2);
-    while(inputStream.peek()!= EOF){
-        std::getline(inputStream,line,'\n');
+    while (inputStream.peek() != EOF) {
+        std::getline(inputStream, line, '\n');
         int i = 0;
         edge[0] = "";
         edge[1] = "";
-        while(line[i] !=' '){
+        while (line[i] != ' ') {
             edge[0] += line[i];
             i++;
         }
         i++;
-        while(i<line.size()){
+        while (i < line.size()) {
             edge[1] += line[i];
             i++;
         }
         edgeList.push_back(edge);
     }
     inputStream.close();
-    combineGraph(edgeList,idArray,feats);
+    combineGraph(edgeList, idArray, feats);
     /*
      * Load description of feats
      */
@@ -117,39 +118,29 @@ Graph::Graph(const std::string fileName){
     line = "";
     std::string inputString;
     int i = 0;
-    while(inputStream.peek() != EOF){
+    while (inputStream.peek() != EOF) {
         i = 0;
         inputString = "";
-        std::getline(inputStream,line,'\n');
-        while(line[i] != ' '){//skip shit
+        std::getline(inputStream, line, '\n');
+        while (line[i] != ' ') {//skip shit
             i++;
         }
-        for(;i<line.length();i++){
+        for (; i < line.length(); i++) {
             inputString += line[i];
         }
         featDescriptorArray.push_back(inputString);
     }
     finishTime = time(0);
     inputStream.close();
-    std::cout<<"Graph has been created with: "<<vertexAmount<<" vertices, in: "<<difftime(finishTime,start)<<
-            "seconds"<<std::endl;
+    std::cout << "Graph has been created with: " << vertexAmount << " vertices, in: " << difftime(finishTime, start) <<
+    "seconds" << std::endl;
 
 }
-/*
- * Method checking the existence of edge between two vertices, and feat compability
- */
-bool Graph::isEdge(int id1, int id2, int feat) const {
-    if (id1 > vertices.size() || id2 > vertices.size())
-        return false;
-    if( std::find(vertices[id1].neighbourhood.begin(),vertices[id1].neighbourhood.end(),id2)
-        != vertices[id1].neighbourhood.end()){
-        if(std::find(vertices[id2].feats.begin(),vertices[id2].feats.end(),feat)
-           != vertices[id2].feats.end()){
-                return true;
-        }
-    }
-    return false;
+
+Graph::Graph() {
+
 }
+
 
 
 

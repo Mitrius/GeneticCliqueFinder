@@ -9,10 +9,11 @@
 class Graph {
 public:
     Graph(std::string fileName);
+
+    Graph();
     int vertexAmount;
     std::vector<Vertex> vertices;
     std::vector<std::string> featDescriptorArray;
-    bool isEdge(int id1, int id2, int feat) const;
 private:
     void combineGraph(const std::vector<std::vector<std::string>> &edgeList, const std::vector <std::string> &idArray,
                       const std::vector<std::vector<bool, std::allocator<bool>>> &feats);

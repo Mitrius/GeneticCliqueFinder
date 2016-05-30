@@ -34,7 +34,7 @@ void CliqueFinder::crossOver(std::vector<Organism> &pop, const unsigned long chi
  */
 std::vector<int> CliqueFinder::randPerm(unsigned int size) {
     std::vector<int> perm;
-    for(int i=0;i<graph->vertexAmount;i++){
+    for (int i = 0; i < graph.vertexAmount; i++) {
         perm.push_back(i);
     }
     std::random_shuffle(perm.begin(),perm.end());
@@ -71,49 +71,25 @@ void CliqueFinder::nextGeneration() {
     std::vector<Organism> newPop;
     int prevPopSize = (int) population.size();
     for (auto &f:population) {
-        int worth = getWorth(f);
-        f.worth = worth;
     }
     selection(newPop);
     crossOver(newPop, prevPopSize - newPop.size());
     for(int i=0;i<newPop.size();i++){
         double z = rand()%RAND_MAX;
         if(z < pMut){
-            newPop[i].mutate(graph->vertexAmount);
+            newPop[i].mutate(graph.vertexAmount);
         }
     }
     population = newPop;
 }
 
-int CliqueFinder::getWorth(Organism pop) {
-    std::set<int> x, na = pop.vertices, r;
-    return RyBKA(r, na, x);
-}
-int CliqueFinder::RyBKA(std::set<int> &r, std::set<int> &p, std::set<int> &x) {
-    if (p.size() == 0 && x.size() == 0) return r.size();
-    int cmax = -1;
-    std::set<int> nr, np, nx;
-    for (auto &t : p) {
-        nr = r;
-        np.clear();
-        nx.clear();
-        nr.insert(t);
-        for (auto &v : p) {
-            if (graph->isEdge(t, v, cliqueFeat) && graph->isEdge(v, t, cliqueFeat)) np.insert(v);
-        }
-        for (auto &v : x) {
-            if (graph->isEdge(t, v, cliqueFeat) && graph->isEdge(v, t, cliqueFeat)) np.insert(v);
-        }
-        int temp = RyBKA(nr, np, nx);
-        if (cmax < temp) cmax = temp;
-    }
-    assert(cmax > 0);//still 0
-    return cmax;
-}
-
 CliqueFinder::CliqueFinder(const Graph &g, const int startAmount, const unsigned int startSize, const int feat,
                            const int desMaxEpoch) {
-    graph = &g;
+    for (int i = 0; i < g.vertices.size(); i++) {
+        if (std::find(g.vertices[i].feats.begin(), g.vertices[i].feats.end(), feat) != g.vertices[i].feats.end()) {
+            graph.vertices.push_back(g.vertices[i]);
+        }
+    }
     std::vector<int> perm;
     Organism tempOrg;
     for(int i=0;i<startAmount;i++){
@@ -141,8 +117,8 @@ std::pair<Organism, int> CliqueFinder::start() {
     });
     int possibleCliqueSize = 0;
     for (const auto setItem:population[0].vertices) {
-        if (std::find(graph->vertices[setItem].feats.begin(), graph->vertices[setItem].feats.end(), cliqueFeat) !=
-            graph->vertices[setItem].feats.end()) {
+        if (std::find(graph.vertices[setItem].feats.begin(), graph.vertices[setItem].feats.end(), cliqueFeat) !=
+            graph.vertices[setItem].feats.end()) {
             possibleCliqueSize++;
         }
     }
