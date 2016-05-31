@@ -107,7 +107,7 @@ Graph::Graph(const std::string fileName) {
         edgeList.push_back(edge);
     }
     inputStream.close();
-    combineGraph(edgeList, idArray, feats);
+    //combineGraph(edgeList, idArray, feats);
     /*
      * Load description of feats
      */

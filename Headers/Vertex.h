@@ -13,6 +13,7 @@ public:
     std::vector<int> feats;
     Vertex();
     bool operator < (const Vertex &a);
+	bool operator == (const Vertex &a);
 };
 
 
