@@ -1,6 +1,5 @@
 #include "../Headers/CliqueFinder.h"
 #include <algorithm>
-#include <fstream>
 #include <iostream>
 #include <iterator>
 #include <cassert>
@@ -159,6 +158,7 @@ CliqueFinder::CliqueFinder(const Graph &g, const int startAmount, const unsigned
  */
 std::pair<Organism, int> CliqueFinder::start() {
     while (epoch < maxEpoch) {
+		std::cout << featName << " generacja: " << epoch << '\n';
 		if (!nextGeneration())
 			break;
         epoch++;
