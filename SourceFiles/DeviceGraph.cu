@@ -30,7 +30,6 @@ __host__ __device__ int RyBKA(DeviceBitset *stack, int *map, int *rsstack, int N
 				}
 				else stack[stackIdx].set(j, 0); //if not, make sure it won't be there.
 			}
-
 			rsstack[stackIdx] = rsstack[N] + 1;
 			stackIdx++;
 		}
