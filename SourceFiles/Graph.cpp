@@ -10,10 +10,10 @@ void Graph::combineGraph(const std::vector<std::vector <std::string> > &edgeList
     std::string currentId;
     Vertex tempVert;
     assert(vertexAmount == feats.size()); //Sanity check
-    for(int i=0;i<vertexAmount;i++){
+    for(unsigned int i=0;i<(unsigned int)vertexAmount;i++){
         tempVert.id = i;
         tempVert.feats.clear();
-        for(int j=0;j<feats[i].size();j++){
+        for(unsigned int j=0;j<feats[i].size();j++){
             assert(i<feats.size());
             assert(j<feats[i].size());
             if(feats[i][j] == 1)
@@ -21,11 +21,11 @@ void Graph::combineGraph(const std::vector<std::vector <std::string> > &edgeList
         }
         vertices.push_back(tempVert);
     }
-    for(int i=0;i<vertices.size();i++){
+    for(unsigned int i=0;i<vertices.size();i++){
         currentId = idArray[i];
-        for(int j = 0; j<edgeList.size();j++){
+        for(unsigned int j = 0; j<edgeList.size();j++){
             if(edgeList[j][0].compare(currentId) == 0){
-                for(int k =0;k<idArray.size();k++){
+                for(unsigned int k =0;k<idArray.size();k++){
                     if(idArray[k].compare(edgeList[j][1]) == 0){
                         vertices[i].neighbourhood.push_back(k);
                         break;
@@ -72,7 +72,7 @@ Graph::Graph(const std::string fileName) {
         idArray.push_back(id);
         while (i < line.size()) {
             if (line[i] != ' ')
-                empty.push_back((bool) (line[i] - 48));// 1/0, feat order persists
+                empty.push_back((line[i] - 48) == 1);// 1/0, feat order persists
             i++;
         }
         feats.push_back(empty);
@@ -92,7 +92,7 @@ Graph::Graph(const std::string fileName) {
     std::vector<std::string> edge(2);
     while (inputStream.peek() != EOF) {
         std::getline(inputStream, line, '\n');
-        int i = 0;
+        unsigned int i = 0;
         edge[0] = "";
         edge[1] = "";
         while (line[i] != ' ') {
@@ -117,7 +117,7 @@ Graph::Graph(const std::string fileName) {
     assert(inputStream.good());
     line = "";
     std::string inputString;
-    int i = 0;
+    unsigned int i = 0;
     while (inputStream.peek() != EOF) {
         i = 0;
         inputString = "";
