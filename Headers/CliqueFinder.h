@@ -7,7 +7,7 @@
 #include "Entry.h"
 #include <map>
 
-//define NSAP_MODE_CPU0 //UNCOMMENT FOR CLASSIC CPU MODE
+//#define NSAP_MODE_CPU0 //UNCOMMENT FOR CLASSIC CPU MODE
 #define NSAP_MODE_GPU
 /*
  * Class representing logic of algorithm

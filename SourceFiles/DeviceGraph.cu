@@ -90,7 +90,12 @@ __host__ DeviceBitset* createBitsetArray(int n) {
 	char *c;
 	for (int i = 0; i < n+1; i++) {
 		cudaMallocManaged(&c, (n / 8) + 1);
-		for (int j = 0; j < (n / 8) + 1; j++) c[j] = 0xFF;
+		for (int j = 0; j < (n / 8)+1; j++) c[j] = 0xFF;
+		char mask = 0x7F;
+		for (int j = 0; j < 8-(n % 8); j++) {
+			c[n / 8] = c[n / 8] & mask;
+			mask = mask >> 1;
+		}
 		res[i].contents = c;
 		res[i].n = n;
 	}
