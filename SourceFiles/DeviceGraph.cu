@@ -16,24 +16,24 @@ __host__ __device__ int RyBKA(DeviceBitset *stack, int *map, int *rsstack, int N
 			rsstack[N] = rsstack[stackIdx];
 			stack[N].n = stack[stackIdx].n;
 			for (int j = 0; j < N; j++) {//push (P \ v)
-				if (stack[N][j] && j != i) stack[stackIdx].set(i, 1);
-				else stack[stackIdx].set(i, 0);
+				if (stack[N][j] && j != i) stack[stackIdx].set(j, 1);
+				else stack[stackIdx].set(j, 0);
 			}
 			rsstack[stackIdx] = rsstack[N];
-			stack[stackIdx].n = stack[N].n - 1;
+			//stack[stackIdx].n = stack[N].n - 1;
 			stackIdx++;
-			int m = 0;
+			//int m = 0;
 			for (int j = 0; j < N; j++) {//for every other vertex
 				if (stack[N][j]) {//that exists, do
 					if (graph->isEdge(map[i], map[j])) {//check for edge by the way of map
 						stack[stackIdx].set(j, 1); //if connected, add to next iteration
-						m++; //also, count
+					//	m++; //also, count
 					}
 					else stack[stackIdx].set(j, 0); //if not, make sure it won't be there.
 				}
 
 			}
-			stack[stackIdx].n = m;
+			//stack[stackIdx].n = m;
 			rsstack[stackIdx] = rsstack[N] + 1;
 			stackIdx++;
 		}
