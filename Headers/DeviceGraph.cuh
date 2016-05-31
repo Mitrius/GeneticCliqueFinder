@@ -32,6 +32,7 @@ struct DeviceBKInput {
 	DeviceBitset **set;
 	DeviceGraph *g;
 	int *map;
+	int *rsstack;
 	int result;
 };
 

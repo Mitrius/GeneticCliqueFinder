@@ -1,7 +1,45 @@
 #include "../Headers/DeviceGraph.cuh"
 #include "cuda_runtime.h"
-#include "../Headers/Common.cuh"
 
+__device__ int RyBKA(DeviceBitset *stack, int *map, int *rsstack, int N, const DeviceGraph *graph) {
+	int stackIdx = 1, cmax = -1;
+	while (stackIdx >= 0) {//while stack not empty
+		stackIdx--; //stack pop
+		if (stack[stackIdx].n == 0) {//if the P set is empty
+			if (cmax < rsstack[stackIdx]) cmax = rsstack[stackIdx]; //check if found clique was greater than the previous one, if so, set
+		}
+		else {//if P is not empty
+			int i = 0;//pick a vertex v
+			while (!stack[stackIdx][i]) i++;//that exists in P
+			for (int j = 0; j < N; j++) {//push (P \ v)
+				if (stack[stackIdx][j] && j != i) stack[stackIdx + 1].set(i, 1);
+				else stack[stackIdx + 1].set(i, 0);
+			}
+			rsstack[stackIdx + 1] = rsstack[stackIdx];
+			stack[stackIdx + 1].n = stack[stackIdx].n - 1;
+			stackIdx++;
+			int m = 0;
+			for (int j = 0; j < N; j++) {//for every other vertex
+				if (stack[stackIdx][j]) {//that exists, do
+					if (graph->isEdge(map[i], map[j])) {//check for edge by the way of map
+						stack[stackIdx + 1].set(j, 1); //if connected, add to next iteration
+						m++; //also, count
+					}
+					else stack[stackIdx + 1].set(j, 0); //if not, make sure it won't be there.
+				}
+
+			}
+			stack[stackIdx + 1].n = m;
+			rsstack[stackIdx + 1] = rsstack[stackIdx] + 1;
+			stackIdx++;
+		}
+	}
+	return cmax;
+}
+
+__device__ void getWorthDev(DeviceBKInput *in) {
+	in->result = RyBKA(*in->set, in->map, in->rsstack, in->set[0]->n, in->g);
+}
 __host__ void indirectMalloc(void **ptr, int size) {
 	void *p;
 	cudaMalloc(&p, size);
@@ -65,8 +103,13 @@ __host__ DeviceBitset** createBitsetArray(int n) {
 }
 
 __host__ void unloadDeviceGraph(DeviceGraph *g) {
-	for (int i = 0; i < g->n; i++)
-		cudaFree(g->vertices[i].neighbors);
+	int n;
+	cudaMemcpy(&g->n, &n, sizeof(int), cudaMemcpyDeviceToHost);
+	for (int i = 0; i < n; i++) {
+		DeviceGraphVertex v;
+		cudaMemcpy(&g->vertices + i*sizeof(DeviceGraphVertex), &v, sizeof(DeviceGraphVertex), cudaMemcpyDeviceToHost);
+		cudaFree(v.neighbors);
+	}
 	cudaFree(g);
 }
 __host__ void freeDeviceBitset(DeviceBitset *b) {
@@ -94,6 +137,7 @@ __host__ void getWorthWithCuda(std::vector<Organism> &pop, DeviceGraph *g) {
 		DeviceBKInput *in;
 		cudaMalloc((void**)&in, sizeof(DeviceBKInput));
 		general.push_back(in);
+
 		int *vertexMap;
 		cudaMalloc((void**)&vertexMap, pop[i].vertices.size()*sizeof(int));
 		general.push_back(vertexMap);
@@ -102,10 +146,18 @@ __host__ void getWorthWithCuda(std::vector<Organism> &pop, DeviceGraph *g) {
 		cudaMemcpy(vertexMap, tempArray, sizeof(int)*pop[i].vertices.size(), cudaMemcpyHostToDevice);
 		delete[] tempArray;
 		cudaMemcpy(&in->map, &vertexMap, sizeof(vertexMap), cudaMemcpyHostToDevice);
+
+		int *resstack;
+		cudaMalloc((void**)&resstack, pop[i].vertices.size()*sizeof(int));
+		cudaMemset(resstack, 0, pop[i].vertices.size()*sizeof(int));
+		cudaMemcpy(&in->rsstack, &resstack, sizeof(resstack), cudaMemcpyHostToDevice);
+
 		DeviceBitset** t = createBitsetArray(pop[i].vertices.size());
+		cudaMemcpy(&in->set, &t, sizeof(t), cudaMemcpyHostToDevice);
+
 		bitsets.push_back(t);
 		results.push_back(&in->result);
-		cudaMemcpy(&in->set, &t, sizeof(t), cudaMemcpyHostToDevice);
+
 		cudaMemcpy(&in->g, &g, sizeof(g), cudaMemcpyHostToDevice);
 		cudaMemcpy(&map[i], &in, sizeof(in), cudaMemcpyHostToDevice);
 	}
