@@ -4,7 +4,6 @@
 #include "cuda_runtime.h"
 
 int main() {
-	cudaSetDevice(1);
     srand((unsigned int) time(NULL));
     std::string filename;
     std::cin>>filename;
