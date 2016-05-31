@@ -17,7 +17,7 @@ __host__ DeviceGraph* loadGraphToDevice(const Graph *g) {
 		v.neighbors = new int[g->vertices[i].neighbourhood.size()];
 		int *neighbors;
 		cudaMalloc((void**)&neighbors, g->vertices[i].neighbourhood.size()*sizeof(int));
-		for (int j = 0; j < g->vertices[i].neighbourhood.size(); j++) {
+		for (unsigned int j = 0; j < g->vertices[i].neighbourhood.size(); j++) {
 			v.neighbors[j] = g->vertices[i].neighbourhood[j];
 		}
 		v.degree = g->vertices[i].neighbourhood.size();
@@ -90,7 +90,7 @@ __host__ void getWorthWithCuda(std::vector<Organism> &pop, DeviceGraph *g) {
 	std::vector<void*> general, bitsets, results;
 	cudaMalloc((void**)&map, sizeof(DeviceBKInput*)*pop.size());
 	general.push_back(map);
-	for (int i = 0; i < pop.size(); i++) {
+	for (unsigned int i = 0; i < pop.size(); i++) {
 		DeviceBKInput *in;
 		cudaMalloc((void**)&in, sizeof(DeviceBKInput));
 		general.push_back(in);
