@@ -113,15 +113,9 @@ __host__ void getWorthWithCuda(std::vector<Organism> &pop, DeviceGraph *g) {
 		current->set = createBitsetArray(M);
 		roadmap[i] = current;
 	}
-
 	DeviceBKInput* in = roadmap[0];
 	in->result = RyBKA(in->set, in->map, in->rsstack, in->set[0].n, in->g);
 
-	//RETURN VALUE IS IN in->result FIRST ORGANISM ONLY!
-
-	//getWorthCudaKernel<<<1, N>>>(roadmap);
-	//cudaDeviceSynchronize();	//must remember this, or bad things will happen. baad thing
-								//cuda kernel launched and finished
 	for (int i = 0; i < N; i++) {
 		pop[i].worth = roadmap[i]->result;
 		cudaFree(roadmap[i]->rsstack);

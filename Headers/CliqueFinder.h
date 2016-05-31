@@ -4,6 +4,7 @@
 #include <vector>
 #include "Organism.h"
 #include "Graph.h"
+#include "Entry.h"
 
 //#define NSAP_MODE_CPU0 //UNCOMMENT FOR CLASSIC CPU MODE
 #define NSAP_MODE_GPU
@@ -37,7 +38,7 @@ public:
     int cliqueFeat = 0;
     double pMut = 0.4;
 
-    std::pair<Organism, int> start();
+    Entry start();
 
     CliqueFinder(const Graph &g, const int startAmount, const unsigned int startSize, const int feat,
                  const int desMaxEpoch);

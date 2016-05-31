@@ -24,8 +24,6 @@ int CliqueFinder::RyBKA(int sr, std::set<int> &p) {
 	return cmax;
 }
 #endif
-
-
 /*
  * Children gets all unique vertices from parents
  */
@@ -56,10 +54,11 @@ void CliqueFinder::crossOver(std::vector<Organism> &pop, const unsigned long chi
 std::vector<int> CliqueFinder::randPerm(unsigned int size) {
     std::vector<int> perm;
     for (int i = 0; i < graph.vertexAmount; i++) {
-        perm.push_back(i);
+        perm.push_back(graph.vertices[i].id);
     }
     std::random_shuffle(perm.begin(),perm.end());
-    perm.resize(size);
+	if (size < graph.vertexAmount)
+		perm.resize(size);
     return perm;
 }
 
@@ -89,35 +88,37 @@ void CliqueFinder::selection(std::vector<Organism> &newPop) {
  * Next step of algorithm, doing selection, mutations, crossing over and replaces population;
  */
 bool CliqueFinder::nextGeneration() {
-    std::vector<Organism> newPop;
-    int prevPopSize = (int) population.size();
+	std::vector<Organism> newPop;
+	int prevPopSize = (int)population.size();
 #if defined(NSAP_MODE_CPU0)
 	for (auto &f : population) {
 		int worth = getWorth(f);
 		f.worth = worth;
-}
+	}
 #elif defined(NSAP_MODE_CPU1)
-    for (auto &f:population) {
+	for (auto &f:population) {
 
-    }
+	}
 #elif defined(NSAP_MODE_GPU)
 	getWorthWithCuda(population, dig);
 #endif
-    selection(newPop);
-    crossOver(newPop, prevPopSize - newPop.size());
-    for(unsigned int i=0;i<newPop.size();i++){
-        double z = rand()%RAND_MAX;
-        if(z < pMut){
-            newPop[i].mutate(graph.vertexAmount);
-        }
-    }
-    population = newPop;
+	selection(newPop);
+	crossOver(newPop, prevPopSize - newPop.size());
+	for (unsigned int i = 0; i < newPop.size(); i++){
+		double z = rand() % RAND_MAX;
+		if (z < pMut){
+			newPop[i].mutate(graph.vertexAmount);
+		}
+	}
+	population = newPop;
 	std::sort(population.begin(), population.end(), [](Organism a, Organism b) {
 		return a.worth > b.worth;
 	});
-	if (population[0].vertices.size() == graph.vertexAmount)//Jeden z organizmów jest OP
+	if (population[0].vertices.size() >= graph.vertexAmount){
 		return false;
-	else return true;
+	}
+	else
+	 return true;
 }
 
 CliqueFinder::CliqueFinder(const Graph &g, const int startAmount, const unsigned int startSize, const int feat,
@@ -128,6 +129,7 @@ CliqueFinder::CliqueFinder(const Graph &g, const int startAmount, const unsigned
         }
     }
 	graph.vertexAmount = graph.vertices.size();
+	featName = g.featDescriptorArray[feat];
 	std::vector<int> fn;
 	for (auto &vertex : graph.vertices){
 		fn.clear();
@@ -141,29 +143,38 @@ CliqueFinder::CliqueFinder(const Graph &g, const int startAmount, const unsigned
     Organism tempOrg;
     for(int i=0;i<startAmount;i++){
         perm = randPerm((startSize));
-        tempOrg.vertices.clear();
-        for(unsigned int j = 0;j<perm.size();j++) {
-            tempOrg.vertices.insert(perm[j]);
-        }
+        tempOrg.vertices.clear();     
+        tempOrg.vertices.insert(perm.begin(),perm.end());
         population.push_back(tempOrg);
     }
     cliqueFeat = feat;
 	maxEpoch = desMaxEpoch;
 #ifdef NSAP_MODE_GPU
 	dig = loadGraphToDevice(&g);
+	std::cout << "Stworzono graf G' majacy :" << graph.vertexAmount << '\n';
 #endif
 }
 /*
  * Main function of class, returning Best clique (organism, along with possible clique size);
  */
-std::pair<Organism, int> CliqueFinder::start() {
+Entry CliqueFinder::start() {
     while (epoch < maxEpoch) {
 		std::cout << featName << " generacja: " << epoch << '\n';
 		if (!nextGeneration())
 			break;
         epoch++;
     }
-    std::pair<Organism, int> retVal(population[0], graph.vertices.size());
+	Entry retVal;
+	retVal.winner = population[0];
+	retVal.possibleClique = graph.vertexAmount;
+	retVal.featName = featName;
+	Organism a;
+	std::vector<int> aVec = randPerm(graph.vertexAmount);
+	a.vertices.insert(aVec.begin(), aVec.end());
+	population.clear();
+	population.push_back(a);
+	getWorthWithCuda(population,dig);
+	retVal.cliqueNumber = population[0].worth;
     return retVal;
 }
 CliqueFinder::~CliqueFinder() {
