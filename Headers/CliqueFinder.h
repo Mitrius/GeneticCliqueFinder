@@ -28,6 +28,7 @@ public:
 #endif
 
     void selection(std::vector<Organism> &newPop);
+	std::string featName;
     bool nextGeneration();
     std::vector<Organism> population;
     Graph graph;
