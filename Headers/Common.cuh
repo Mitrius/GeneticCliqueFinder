@@ -6,6 +6,6 @@
 
 
 __device__ int RyBKA(DeviceBitset *stack, int *map, int N, const DeviceGraph *graph);
-__global__ void getWorthDev(DeviceBKInput *in);
+__device__ void getWorthDev(DeviceBKInput *in);
 
 #endif
