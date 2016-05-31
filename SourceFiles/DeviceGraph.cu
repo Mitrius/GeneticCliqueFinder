@@ -48,23 +48,17 @@ __host__ void indirectMalloc(void **ptr, int size) {
 
 __host__ DeviceGraph* loadGraphToDevice(const Graph *g) {
 	DeviceGraph *res;
-	cudaMalloc((void**)&res, sizeof(DeviceGraph));
-	indirectMalloc((void**)&res->vertices, g->vertexAmount*sizeof(DeviceGraphVertex));
+	cudaMallocManaged(&res, sizeof(DeviceGraph));
+	res->n = g->vertexAmount;
+	cudaMallocManaged(&res->vertices, g->vertexAmount*sizeof(DeviceGraphVertex));
 	for (int i = 0; i < g->vertexAmount; i++) {
-		DeviceGraphVertex v;
-		v.neighbors = new int[g->vertices[i].neighbourhood.size()];
-		int *neighbors;
-		cudaMalloc((void**)&neighbors, g->vertices[i].neighbourhood.size()*sizeof(int));
-		for (unsigned int j = 0; j < g->vertices[i].neighbourhood.size(); j++) {
-			v.neighbors[j] = g->vertices[i].neighbourhood[j];
+		int m = g->vertices[i].neighbourhood.size();
+		res->vertices[i].degree = m;
+		cudaMallocManaged(&res->vertices[i].neighbors, m*sizeof(int));
+		for (unsigned int j = 0; j < m; j++) {
+			res->vertices[i].neighbors[j] = g->vertices[i].neighbourhood[j];
 		}
-		v.degree = g->vertices[i].neighbourhood.size();
-		cudaMemcpy(neighbors, v.neighbors, g->vertices[i].neighbourhood.size()*sizeof(int), cudaMemcpyHostToDevice);
-		delete[] v.neighbors;
-		v.neighbors = neighbors;
-		cudaMemcpy((&res->vertices)+i*sizeof(DeviceGraphVertex), &v, sizeof(DeviceGraphVertex), cudaMemcpyHostToDevice);
 	}
-	cudaMemcpy(&res->n, &g->vertexAmount, sizeof(int), cudaMemcpyHostToDevice);
 	return res;
 }
 
@@ -83,28 +77,19 @@ __device__ void DeviceBitset::set(int n, bool v) {
 }
 
 __host__ void unloadDeviceGraph(DeviceGraph *g) {
-	int n;
-	cudaMemcpy(&g->n, &n, sizeof(int), cudaMemcpyDeviceToHost);
-	for (int i = 0; i < n; i++) {
-		DeviceGraphVertex v;
-		cudaMemcpy(&g->vertices + i*sizeof(DeviceGraphVertex), &v, sizeof(DeviceGraphVertex), cudaMemcpyDeviceToHost);
-		cudaFree(v.neighbors);
-	}
+	for (int i = 0; i < g->n; i++) cudaFree(g->vertices[i].neighbors);
+	cudaFree(g->vertices);
 	cudaFree(g);
 }
 
 __host__ DeviceBitset* createBitsetArray(int n) {
-	DeviceBitset *res, model, *temp;
-	cudaMalloc(&res, n*sizeof(DeviceBitset));
-	model.n = n;
-	temp = res;
+	DeviceBitset *res;
+	cudaMallocManaged(&res, n*sizeof(DeviceBitset));
 	char *c;
 	for (int i = 0; i < n; i++) {
-		cudaMalloc(&c, (n / 8) + 1);
-		cudaMemset(c, 0xFF, (n / 8) + 1);
-		model.contents = c;
-		cudaMemcpy(temp, &model, sizeof(model), cudaMemcpyHostToDevice);
-		temp += sizeof(model);
+		cudaMallocManaged(&c, (n / 8) + 1);
+		res[i].contents = c;
+		res[i].n = n;
 	}
 	return res;
 }
@@ -117,44 +102,32 @@ __global__ void getWorthCudaKernel(DeviceBKInput **roadmap) {
 
 __host__ void getWorthWithCuda(std::vector<Organism> &pop, DeviceGraph *g) {
 	int N = pop.size();
-	DeviceBKInput **roadmap = new DeviceBKInput*[N], **newroadmap = new DeviceBKInput*[N];
+	DeviceBKInput **roadmap;
+	cudaMallocManaged(&roadmap, N*sizeof(DeviceBKInput*));
 	for (int i = 0; i < N; i++) {
 		int M = pop[i].vertices.size();
-		roadmap[i] = new DeviceBKInput;
-		roadmap[i]->g = g;
-		roadmap[i]->result = -1;
-		int *rsstack;
-		cudaMalloc(&rsstack, sizeof(int)*M);
-		roadmap[i]->rsstack = rsstack;
-		int *map, *mapH = new int[M], it = 0;
-		cudaMalloc(&map, sizeof(int)*M);
-		for (auto &t : pop[i].vertices) mapH[it++] = t;
-		cudaMemcpy(map, mapH, sizeof(int)*M, cudaMemcpyHostToDevice);
-		roadmap[i]->set = createBitsetArray(M);
-		DeviceBKInput *t;
-		cudaMalloc(&t, sizeof(DeviceBKInput));
-		cudaMemcpy(t, roadmap[i], sizeof(DeviceBKInput), cudaMemcpyHostToDevice);
-		newroadmap[i] = t;
-		delete[] mapH;
+		DeviceBKInput *current;
+		cudaMallocManaged(&current, sizeof(DeviceBKInput));
+		current->result = -1;
+		current->g = g;
+		cudaMallocManaged(&current->map, M*sizeof(int));
+		int j = 0;
+		for (auto &t : pop[i].vertices) current->map[j++] = t;
+		cudaMallocManaged(&current->rsstack, M*sizeof(int));
+		for (int k = 0; k < M; k++) current->rsstack[k] = 0;
+		current->set = createBitsetArray(M);
+		roadmap[i] = current;
 	}
-	DeviceBKInput **tab;
-	cudaMalloc(&tab, sizeof(DeviceBKInput*)*N);
-	cudaMemcpy(tab, newroadmap, sizeof(DeviceBKInput*)*N, cudaMemcpyHostToDevice);
 
 	getWorthCudaKernel<<<1, N>>>(roadmap);
 	cudaDeviceSynchronize();	//must remember this, or bad things will happen. baad thing
 								//cuda kernel launched and finished
 	for (int i = 0; i < N; i++) {
-		DeviceBKInput bi;
-		cudaMemcpy(&bi, tab+i*sizeof(bi), sizeof(bi), cudaMemcpyDeviceToHost);
-		pop[i].worth = bi.result;
+		pop[i].worth = roadmap[i]->result;
 		cudaFree(roadmap[i]->rsstack);
 		cudaFree(roadmap[i]->set);
 		cudaFree(roadmap[i]->map);
-		cudaFree(newroadmap[i]);
+		cudaFree(roadmap[i]);
 	}
-	cudaFree(tab);
-	for (int i = 0; i < N; i++) delete roadmap[i];
-	delete[] roadmap;
-	delete[] newroadmap;
+	cudaFree(roadmap);
 }
