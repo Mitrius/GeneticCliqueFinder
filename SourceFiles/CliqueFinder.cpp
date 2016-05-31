@@ -174,10 +174,15 @@ Entry CliqueFinder::start() {
 	Organism a;
 	std::vector<int> aVec = randPerm(graph.vertexAmount);
 	a.vertices.insert(aVec.begin(), aVec.end());
-	population.clear();
-	population.push_back(a);
-	getWorthWithCuda(population,dig);
-	retVal.cliqueNumber = population[0].worth;
+	#if defined(NSAP_MODE_GPU)
+		population.clear();
+		population.push_back(a);
+		getWorthWithCuda(population, dig);
+		retVal.cliqueNumber = population[0].worth;
+	#endif
+	#if defined(NSAP_MODE_CPU0)
+		retVal.cliqueNumber = getWorth(a);
+	#endif
     return retVal;
 }
 CliqueFinder::~CliqueFinder() {
