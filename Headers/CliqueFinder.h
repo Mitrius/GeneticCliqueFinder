@@ -6,10 +6,14 @@
 #include "Graph.h"
 
 //#define NSAP_MODE_CPU0 //UNCOMMENT FOR CLASSIC CPU MODE
+#define NSAP_MODE_GPU
 /*
  * Class representing logic of algorithm
  * All organisms from population represent the same feat
  */
+#ifdef NSAP_MODE_GPU
+#include "../Headers/DeviceGraph.cuh"
+#endif
 class CliqueFinder {
 public:
     void crossOver(std::vector<Organism> &pop, unsigned long childrenAmount);
@@ -18,6 +22,9 @@ public:
 #if defined(NSAP_MODE_CPU0)
 	int getWorth(Organism pop);
 	int CliqueFinder::RyBKA(int sr, std::set<int> &p);
+#endif
+#ifdef NSAP_MODE_GPU
+	DeviceGraph *dig;
 #endif
 
     void selection(std::vector<Organism> &newPop);
@@ -33,6 +40,7 @@ public:
 
     CliqueFinder(const Graph &g, const int startAmount, const unsigned int startSize, const int feat,
                  const int desMaxEpoch);
+	~CliqueFinder();
 };
 
 

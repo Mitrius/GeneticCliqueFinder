@@ -32,6 +32,6 @@ __device__ int RyBKA(DeviceBitset *stack, int *map, int N, const DeviceGraph *gr
 	return cmax;
 }
 
-__global__ void getWorthDev(int *inputArr, int inputSize, const DeviceGraph *g, int *result) {
-	*result = RyBKA(0, inputArr, inputSize, g);
+__global__ void getWorthDev(DeviceBKInput *in) {
+	in->result = RyBKA(*in->set, in->map, in->set[0]->n, in->g);
 }

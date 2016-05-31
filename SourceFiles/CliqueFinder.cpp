@@ -5,9 +5,6 @@
 #include <iterator>
 #include <cassert>
 
-/*
- * Children gets all unique vertices from parents
- */
 #if defined(NSAP_MODE_CPU0)
 int CliqueFinder::getWorth(Organism pop) {
 	return RyBKA(0, pop.vertices);
@@ -30,6 +27,9 @@ int CliqueFinder::RyBKA(int sr, std::set<int> &p) {
 #endif
 
 
+/*
+ * Children gets all unique vertices from parents
+ */
 void CliqueFinder::crossOver(std::vector<Organism> &pop, const unsigned long childrenAmount) {
     Organism child;
     Organism father;
@@ -101,10 +101,8 @@ void CliqueFinder::nextGeneration() {
     for (auto &f:population) {
 
     }
-#else 
-	for (auto &f : population) {
-
-	}
+#elif defined(NSAP_MODE_GPU)
+	getWorthWithCuda(population, dig);
 #endif
     selection(newPop);
     crossOver(newPop, prevPopSize - newPop.size());
@@ -135,7 +133,10 @@ CliqueFinder::CliqueFinder(const Graph &g, const int startAmount, const unsigned
         population.push_back(tempOrg);
     }
     cliqueFeat = feat;
-    maxEpoch = desMaxEpoch;
+	maxEpoch = desMaxEpoch;
+#ifdef NSAP_MODE_GPU
+	dig = loadGraphToDevice(&g);
+#endif
 }
 /*
  * Main function of class, returning Best clique (organism, along with possible clique size);
@@ -160,6 +161,10 @@ std::pair<Organism, int> CliqueFinder::start() {
     return retVal;
 }
 
-
+CliqueFinder::~CliqueFinder() {
+#ifdef NSAP_MODE_GPU
+	unloadDeviceGraph(dig);
+#endif
+}
 
 

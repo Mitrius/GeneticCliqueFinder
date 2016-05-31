@@ -2,6 +2,8 @@
 #define NSAP_DEVICE_GRAPH
 #include "thrust\device_vector.h"
 #include "Graph.h"
+#include <vector>
+#include "Organism.h"
 
 struct DeviceGraphVertex {
 	int *neighbors, degree;
@@ -26,9 +28,17 @@ struct DeviceBitset {
 	__device__ void set(int n, bool v);
 };
 
+struct DeviceBKInput {
+	DeviceBitset **set;
+	DeviceGraph *g;
+	int *map;
+	int result;
+};
+
 __host__ DeviceGraph* loadGraphToDevice(const Graph *g);
 __host__ DeviceBitset* createDeviceBitset(int n);
 __host__ void unloadDeviceGraph(DeviceGraph *g);
 __host__ void freeDeviceBitset(DeviceBitset *b);
+__host__ void getWorthWithCuda(std::vector<Organism> &pop, DeviceGraph *g);
 
 #endif
