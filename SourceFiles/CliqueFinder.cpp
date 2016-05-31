@@ -8,6 +8,28 @@
 /*
  * Children gets all unique vertices from parents
  */
+#if defined(NSAP_MODE_CPU0)
+int CliqueFinder::getWorth(Organism pop) {
+	return RyBKA(0, pop.vertices);
+}
+int CliqueFinder::RyBKA(int sr, std::set<int> &p) {
+	if (p.size() == 0) return sr;
+	int cmax = -1;
+	std::set<int> np;
+	for (auto &t : p) {
+		np.clear();
+		for (auto &v : p) {
+			if (std::find(graph.vertices[v].neighbourhood.begin(), graph.vertices[v].neighbourhood.end(), t)
+				!= graph.vertices[v].neighbourhood.end()) np.insert(v);
+		}
+		int temp = RyBKA(sr+1, np);
+		if (cmax < temp) cmax = temp;
+	}
+	return cmax;
+}
+#endif
+
+
 void CliqueFinder::crossOver(std::vector<Organism> &pop, const unsigned long childrenAmount) {
     Organism child;
     Organism father;
@@ -70,8 +92,20 @@ void CliqueFinder::selection(std::vector<Organism> &newPop) {
 void CliqueFinder::nextGeneration() {
     std::vector<Organism> newPop;
     int prevPopSize = (int) population.size();
+#if defined(NSAP_MODE_CPU0)
+	for (auto &f : population) {
+		int worth = getWorth(f);
+		f.worth = worth;
+}
+#elif defined(NSAP_MODE_CPU1)
     for (auto &f:population) {
+
     }
+#else 
+	for (auto &f : population) {
+
+	}
+#endif
     selection(newPop);
     crossOver(newPop, prevPopSize - newPop.size());
     for(int i=0;i<newPop.size();i++){
