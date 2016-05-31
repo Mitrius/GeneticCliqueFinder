@@ -190,5 +190,3 @@ CliqueFinder::~CliqueFinder() {
 	unloadDeviceGraph(dig);
 #endif
 }
-
-

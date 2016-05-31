@@ -28,7 +28,6 @@ public:
 #ifdef NSAP_MODE_GPU
 	DeviceGraph *dig;
 #endif
-
     void selection(std::vector<Organism> &newPop);
 	std::string featName;
 	std::map<int, int> IdsDescriptorArray;
@@ -37,7 +36,7 @@ public:
     Graph graph;
     int epoch = 0;
     int maxEpoch;
-    int cliqueFeat = 0;
+    int cliqueFeat;
     double pMut = 0.4;
 
     Entry start();

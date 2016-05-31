@@ -121,9 +121,10 @@ __host__ void getWorthWithCuda(std::vector<Organism> &pop, DeviceGraph *g) {
 		current->set = createBitsetArray(M);
 		roadmap[i] = current;
 	}
-	DeviceBKInput* in = roadmap[0];
-	in->result = RyBKA(in->set, in->map, in->rsstack, in->set[0].n, in->g);
-
+	for (int i = 0; i < N; i++){
+		DeviceBKInput* in = roadmap[i];	
+		in->result = RyBKA(in->set, in->map, in->rsstack, in->set[0].n, in->g);
+	}
 	for (int i = 0; i < N; i++) {
 		pop[i].worth = roadmap[i]->result;
 		cudaFree(roadmap[i]->rsstack);
