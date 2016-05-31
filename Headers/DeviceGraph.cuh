@@ -4,6 +4,8 @@
 #include "Graph.h"
 #include <vector>
 #include "Organism.h"
+//#define NSAP_MODE_CPU0 //UNCOMMENT FOR CLASSIC CPU MODE
+#define NSAP_MODE_GPU
 
 struct DeviceGraphVertex {
 	int *neighbors, degree;

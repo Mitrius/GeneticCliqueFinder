@@ -96,9 +96,7 @@ bool CliqueFinder::nextGeneration() {
 		f.worth = worth;
 	}
 #elif defined(NSAP_MODE_CPU1)
-	for (auto &f:population) {
-
-	}
+	getWorthWithCuda(population, dig);
 #elif defined(NSAP_MODE_GPU)
 	getWorthWithCuda(population, dig);
 #endif
