@@ -14,8 +14,8 @@ struct Entry{
 		for (auto vert : winner.vertices){
 			output += std::to_string(vert) + " ";
 		}
-		output += " " + std::to_string(possibleClique);
-		output += " " + std::to_string(cliqueNumber) + '\n';
+		output += " rozmiar mozliwej kliki " + std::to_string(possibleClique);
+		output += " liczba klikowa: " + std::to_string(cliqueNumber) + '\n';
 		stream << output;
 	}
 };

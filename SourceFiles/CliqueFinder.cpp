@@ -1,8 +1,10 @@
 #include "../Headers/CliqueFinder.h"
+
 #include <algorithm>
 #include <iostream>
 #include <iterator>
 #include <cassert>
+#define NSAP_MODE_GPU
 
 #if defined(NSAP_MODE_CPU0)
 int CliqueFinder::getWorth(Organism pop) {

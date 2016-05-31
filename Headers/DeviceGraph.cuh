@@ -4,13 +4,12 @@
 #include "Graph.h"
 #include <vector>
 #include "Organism.h"
-//#define NSAP_MODE_CPU0 //UNCOMMENT FOR CLASSIC CPU MODE
+//#define NSAP_MODE_CPU1 //UNCOMMENT FOR CLASSIC CPU MODE
 #define NSAP_MODE_GPU
 
 struct DeviceGraphVertex {
 	int *neighbors, degree;
 };
-
 struct DeviceGraph {
 	int n;
 	DeviceGraphVertex *vertices;
@@ -21,7 +20,6 @@ struct DeviceGraph {
 		return false;
 	}
 };
-
 struct DeviceBitset {
 	int n;
 	char *contents;

@@ -1,5 +1,8 @@
 #include "../Headers/DeviceGraph.cuh"
 #include "cuda_runtime.h"
+#include <fstream>
+#include <cuda.h>
+#include <cuda_runtime_api.h>
 
 __host__ __device__ int RyBKA(DeviceBitset *stack, int *map, int *rsstack, int N, const DeviceGraph *graph) {
 	int stackIdx = 1, cmax = -1;
@@ -107,6 +110,12 @@ __global__ void getWorthCudaKernel(DeviceBKInput **roadmap) {
 
 __host__ void getWorthWithCuda(std::vector<Organism> &pop, DeviceGraph *g) {
 	int N = pop.size();
+	std::fstream f("log.txt", std::ofstream::app);
+	f << "popSize: " << N <<  '\n';
+	for (int i = 0; i < N; i++){
+		f <<i<<" : "<< pop[i].vertices.size()<<'\n';
+	}
+	f.close();
 	DeviceBKInput **roadmap;
 	cudaMallocManaged(&roadmap, N*sizeof(DeviceBKInput*));
 	for (int i = 0; i < N; i++) {
@@ -134,10 +143,13 @@ __host__ void getWorthWithCuda(std::vector<Organism> &pop, DeviceGraph *g) {
 	cudaDeviceSynchronize();
 #endif
 	for (int i = 0; i < N; i++) {
+		size_t f, t;
+		CUresult result = cuMemGetInfo(&f, &t);
+		std::cout << "free: " << f << '\n';
 		pop[i].worth = roadmap[i]->result;
 		cudaFree(roadmap[i]->rsstack);
 		cudaFree(roadmap[i]->map);
-		for (int j = 0; j < roadmap[i]->set->n; j++) cudaFree(roadmap[i]->set[j].contents);
+		for (int j = 0; j < roadmap[i]->set->n + 1; j++) cudaFree(roadmap[i]->set[j].contents);
 		cudaFree(roadmap[i]->set);
 		cudaFree(roadmap[i]);
 	}
