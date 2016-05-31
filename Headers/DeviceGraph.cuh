@@ -12,7 +12,7 @@ struct DeviceGraphVertex {
 struct DeviceGraph {
 	int n;
 	DeviceGraphVertex *vertices;
-	__device__ bool isEdge(int v, int t) const {
+	__host__ __device__ bool isEdge(int v, int t) const {
 		for (int i = 0; i < vertices[v].degree; i++) {
 			if (vertices[v].neighbors[i] == t) return true;
 			else if (vertices[v].neighbors[i] > t) return false;
@@ -24,8 +24,8 @@ struct DeviceGraph {
 struct DeviceBitset {
 	int n;
 	char *contents;
-	__device__ bool operator[](int n);
-	__device__ void set(int n, bool v);
+	__host__ __device__ bool operator[](int n);
+	__host__ __device__ void set(int n, bool v);
 };
 
 struct DeviceBKInput {
@@ -37,9 +37,7 @@ struct DeviceBKInput {
 };
 
 __host__ DeviceGraph* loadGraphToDevice(const Graph *g);
-__host__ DeviceBitset* createDeviceBitset(int n);
 __host__ void unloadDeviceGraph(DeviceGraph *g);
-__host__ void freeDeviceBitset(DeviceBitset *b);
 __host__ void getWorthWithCuda(std::vector<Organism> &pop, DeviceGraph *g);
 
 #endif

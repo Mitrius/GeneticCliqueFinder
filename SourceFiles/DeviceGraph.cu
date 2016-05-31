@@ -1,7 +1,7 @@
 #include "../Headers/DeviceGraph.cuh"
 #include "cuda_runtime.h"
 
-__device__ int RyBKA(DeviceBitset *stack, int *map, int *rsstack, int N, const DeviceGraph *graph) {
+__host__ __device__ int RyBKA(DeviceBitset *stack, int *map, int *rsstack, int N, const DeviceGraph *graph) {
 	int stackIdx = 1, cmax = -1;
 	while (stackIdx >= 0) {//while stack not empty
 		stackIdx--; //stack pop
@@ -37,15 +37,6 @@ __device__ int RyBKA(DeviceBitset *stack, int *map, int *rsstack, int N, const D
 	return cmax;
 }
 
-__device__ void getWorthDev(DeviceBKInput *in) {
-	in->result = RyBKA(in->set, in->map, in->rsstack, in->set[0].n, in->g);
-}
-__host__ void indirectMalloc(void **ptr, int size) {
-	void *p;
-	cudaMalloc(&p, size);
-	cudaMemcpy(ptr, &p, sizeof(void*), cudaMemcpyHostToDevice);
-}
-
 __host__ DeviceGraph* loadGraphToDevice(const Graph *g) {
 	DeviceGraph *res;
 	cudaMallocManaged(&res, sizeof(DeviceGraph));
@@ -62,14 +53,14 @@ __host__ DeviceGraph* loadGraphToDevice(const Graph *g) {
 	return res;
 }
 
-__device__ bool DeviceBitset::operator[](int n) {
+__host__ __device__ bool DeviceBitset::operator[](int n) {
 	int idx = n / 8;
 	int rem = n % 8;
 	char mask = 0x1 << rem;
 	return (contents[idx] & mask) ? true : false;
 }
 
-__device__ void DeviceBitset::set(int n, bool v) {
+__host__ __device__ void DeviceBitset::set(int n, bool v) {
 	int idx = n / 8;
 	int rem = n % 8;
 	char mask = (v ? 1 : 0) << rem;
@@ -88,6 +79,7 @@ __host__ DeviceBitset* createBitsetArray(int n) {
 	char *c;
 	for (int i = 0; i < n; i++) {
 		cudaMallocManaged(&c, (n / 8) + 1);
+		for (int j = 0; j < (n / 8) + 1; j++) c[j] = 0xFF;
 		res[i].contents = c;
 		res[i].n = n;
 	}
@@ -96,8 +88,8 @@ __host__ DeviceBitset* createBitsetArray(int n) {
 
 __global__ void getWorthCudaKernel(DeviceBKInput **roadmap) {
 	int myId = threadIdx.x;
-	DeviceBKInput* myInput = roadmap[myId];
-	getWorthDev(myInput);
+	DeviceBKInput* in = roadmap[myId];
+	in->result = RyBKA(in->set, in->map, in->rsstack, in->set[0].n, in->g);
 }
 
 __host__ void getWorthWithCuda(std::vector<Organism> &pop, DeviceGraph *g) {
@@ -119,14 +111,20 @@ __host__ void getWorthWithCuda(std::vector<Organism> &pop, DeviceGraph *g) {
 		roadmap[i] = current;
 	}
 
-	getWorthCudaKernel<<<1, N>>>(roadmap);
-	cudaDeviceSynchronize();	//must remember this, or bad things will happen. baad thing
+	DeviceBKInput* in = roadmap[0];
+	in->result = RyBKA(in->set, in->map, in->rsstack, in->set[0].n, in->g);
+
+	//RETURN VALUE IS IN in->result FIRST ORGANISM ONLY!
+
+	//getWorthCudaKernel<<<1, N>>>(roadmap);
+	//cudaDeviceSynchronize();	//must remember this, or bad things will happen. baad thing
 								//cuda kernel launched and finished
 	for (int i = 0; i < N; i++) {
 		pop[i].worth = roadmap[i]->result;
 		cudaFree(roadmap[i]->rsstack);
-		cudaFree(roadmap[i]->set);
 		cudaFree(roadmap[i]->map);
+		for (int j = 0; j < roadmap[i]->set->n; j++) cudaFree(roadmap[i]->set[j].contents);
+		cudaFree(roadmap[i]->set);
 		cudaFree(roadmap[i]);
 	}
 	cudaFree(roadmap);
