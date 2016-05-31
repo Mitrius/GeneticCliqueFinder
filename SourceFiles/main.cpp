@@ -2,20 +2,6 @@
 #include <ctime>
 #include "../Headers/CliqueFinder.h"
 #include <fstream>
-
-struct Entry{
-	std::pair<Organism, int> result;
-	std::string featName;
-	void print(std::ofstream &stream){
-		std::string output = featName+ "  ";
-		output += std::to_string(result.first.worth)+ "  ";
-		for (auto vert : result.first.vertices){
-			output += std::to_string(vert) + " ";
-		}
-		output += " " + std::to_string(result.second);
-		stream << output;
-	}
-};
 int main() {
     srand((unsigned int) time(NULL));
     std::string filename;
@@ -23,7 +9,7 @@ int main() {
 	std::vector<Entry> history;
     Graph graph(filename);
 	bool good = true;
-	Entry ent;
+	int i = 0;
 	for (auto featDesc :graph.featDescriptorArray){
 		for (unsigned int k = 0; k < featDesc.length();k++){
 			if ((featDesc[k] > 122 && featDesc[k] < 65) && (featDesc[k] != ':') && (featDesc[k] != ' ')){
@@ -33,18 +19,16 @@ int main() {
 		}
 		if (!good)
 			continue;
-		CliqueFinder finder(graph, 20, 100, 1, 100);
-		ent.result = finder.start();
-		ent.featName = featDesc;
-		history.push_back(ent);
+		CliqueFinder finder(graph, 20, 10, i, 50);
+		i++;
+		history.push_back(finder.start());
 		good = true;
 	}
-	/*filename = "results.txt";
+	filename = "results.txt";
 	std::ofstream outSTream(filename, std::ofstream::trunc);
 	for (auto entry : history){
 		entry.print(outSTream);
 	}
-    */
 
     return 0;
 }

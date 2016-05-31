@@ -142,7 +142,7 @@ __host__ void getWorthWithCuda(std::vector<Organism> &pop, DeviceGraph *g) {
 	cudaMemcpy(tab, newroadmap, sizeof(DeviceBKInput*)*N, cudaMemcpyHostToDevice);
 
 	getWorthCudaKernel<<<1, N>>>(roadmap);
-	cudaDeviceSynchronize();	//must remember this, or bad things will happen. baad thing
+	cudaDeviceSynchronize();	//must remember this, or bad things will happen. baad things
 								//cuda kernel launched and finished
 	for (int i = 0; i < N; i++) {
 		DeviceBKInput bi;
