@@ -28,7 +28,7 @@ public:
 #endif
 
     void selection(std::vector<Organism> &newPop);
-    void nextGeneration();
+    bool nextGeneration();
     std::vector<Organism> population;
     Graph graph;
     int epoch = 0;

@@ -10,6 +10,9 @@ Vertex::Vertex() {
 bool Vertex::operator<(const Vertex &a) {
     return id > a.id;
 }
+bool Vertex::operator == (const Vertex &a){
+	return id == a.id;
+}
 
 
 

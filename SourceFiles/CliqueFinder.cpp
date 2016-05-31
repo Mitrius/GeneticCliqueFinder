@@ -37,7 +37,7 @@ void CliqueFinder::crossOver(std::vector<Organism> &pop, const unsigned long chi
     std::vector<Organism> children;
     unsigned long chosenOrganism;
     assert(pop.size() > 0);
-    for (int i = 0; i < childrenAmount; i++) {
+    for (unsigned int i = 0; i < childrenAmount; i++) {
         child.vertices.clear();
         chosenOrganism = rand() % pop.size();
         father = pop[chosenOrganism];
@@ -71,7 +71,7 @@ void CliqueFinder::selection(std::vector<Organism> &newPop) {
     unsigned long TournAmount = population.size() / 2;
     unsigned long cont = 0;
     Organism organism1, organism2;
-    for (int i = 0; i < TournAmount; i++) {
+    for (unsigned int i = 0; i < TournAmount; i++) {
         cont = rand() % population.size();
         organism1 = population[cont];
         population.erase(population.begin() + cont);
@@ -89,7 +89,7 @@ void CliqueFinder::selection(std::vector<Organism> &newPop) {
 /*
  * Next step of algorithm, doing selection, mutations, crossing over and replaces population;
  */
-void CliqueFinder::nextGeneration() {
+bool CliqueFinder::nextGeneration() {
     std::vector<Organism> newPop;
     int prevPopSize = (int) population.size();
 #if defined(NSAP_MODE_CPU0)
@@ -106,28 +106,44 @@ void CliqueFinder::nextGeneration() {
 #endif
     selection(newPop);
     crossOver(newPop, prevPopSize - newPop.size());
-    for(int i=0;i<newPop.size();i++){
+    for(unsigned int i=0;i<newPop.size();i++){
         double z = rand()%RAND_MAX;
         if(z < pMut){
             newPop[i].mutate(graph.vertexAmount);
         }
     }
     population = newPop;
+	std::sort(population.begin(), population.end(), [](Organism a, Organism b) {
+		return a.worth > b.worth;
+	});
+	if (population[0].vertices.size() == graph.vertexAmount)//Jeden z organizmów jest OP
+		return false;
+	else return true;
 }
 
 CliqueFinder::CliqueFinder(const Graph &g, const int startAmount, const unsigned int startSize, const int feat,
                            const int desMaxEpoch) {
-    for (int i = 0; i < g.vertices.size(); i++) {
+    for (unsigned int i = 0; i < g.vertices.size(); i++) {
         if (std::find(g.vertices[i].feats.begin(), g.vertices[i].feats.end(), feat) != g.vertices[i].feats.end()) {
             graph.vertices.push_back(g.vertices[i]);
         }
     }
+	graph.vertexAmount = graph.vertices.size();
+	std::vector<int> fn;
+	for (auto &vertex : graph.vertices){
+		fn.clear();
+		for (auto &t : graph.vertices){
+			if (std::find(vertex.neighbourhood.begin(), vertex.neighbourhood.end(), t.id) != vertex.neighbourhood.end())
+				fn.push_back(t.id);
+		}
+		vertex.neighbourhood = fn;
+	}
     std::vector<int> perm;
     Organism tempOrg;
     for(int i=0;i<startAmount;i++){
         perm = randPerm((startSize));
         tempOrg.vertices.clear();
-        for(int j = 0;j<perm.size();j++) {
+        for(unsigned int j = 0;j<perm.size();j++) {
             tempOrg.vertices.insert(perm[j]);
         }
         population.push_back(tempOrg);
@@ -142,25 +158,14 @@ CliqueFinder::CliqueFinder(const Graph &g, const int startAmount, const unsigned
  * Main function of class, returning Best clique (organism, along with possible clique size);
  */
 std::pair<Organism, int> CliqueFinder::start() {
-    assert(epoch < maxEpoch);
     while (epoch < maxEpoch) {
-        nextGeneration();
+		if (!nextGeneration())
+			break;
         epoch++;
     }
-    std::sort(population.begin(), population.end(), [](Organism a, Organism b) {
-        return a.worth > b.worth;
-    });
-    int possibleCliqueSize = 0;
-    for (const auto setItem:population[0].vertices) {
-        if (std::find(graph.vertices[setItem].feats.begin(), graph.vertices[setItem].feats.end(), cliqueFeat) !=
-            graph.vertices[setItem].feats.end()) {
-            possibleCliqueSize++;
-        }
-    }
-    std::pair<Organism, int> retVal(population[0], possibleCliqueSize);
+    std::pair<Organism, int> retVal(population[0], graph.vertices.size());
     return retVal;
 }
-
 CliqueFinder::~CliqueFinder() {
 #ifdef NSAP_MODE_GPU
 	unloadDeviceGraph(dig);
