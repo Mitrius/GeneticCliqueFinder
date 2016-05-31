@@ -11,26 +11,29 @@ __host__ __device__ int RyBKA(DeviceBitset *stack, int *map, int *rsstack, int N
 		else {//if P is not empty
 			int i = 0;//pick a vertex v
 			while (!stack[stackIdx][i]) i++;//that exists in P
+			//now to copy to unofficial N-th bitset
+			for (int j = 0; j < (N / 8) + 1; j++) stack[N].contents[j] = stack[stackIdx].contents[j];
+			stack[N].n = stack[stackIdx].n;
 			for (int j = 0; j < N; j++) {//push (P \ v)
-				if (stack[stackIdx][j] && j != i) stack[stackIdx + 1].set(i, 1);
-				else stack[stackIdx + 1].set(i, 0);
+				if (stack[N][j] && j != i) stack[stackIdx].set(i, 1);
+				else stack[stackIdx].set(i, 0);
 			}
-			rsstack[stackIdx + 1] = rsstack[stackIdx];
-			stack[stackIdx + 1].n = stack[stackIdx].n - 1;
+			rsstack[stackIdx] = rsstack[N];
+			stack[stackIdx].n = stack[N].n - 1;
 			stackIdx++;
 			int m = 0;
 			for (int j = 0; j < N; j++) {//for every other vertex
-				if (stack[stackIdx][j]) {//that exists, do
+				if (stack[N][j]) {//that exists, do
 					if (graph->isEdge(map[i], map[j])) {//check for edge by the way of map
-						stack[stackIdx + 1].set(j, 1); //if connected, add to next iteration
+						stack[stackIdx].set(j, 1); //if connected, add to next iteration
 						m++; //also, count
 					}
-					else stack[stackIdx + 1].set(j, 0); //if not, make sure it won't be there.
+					else stack[stackIdx].set(j, 0); //if not, make sure it won't be there.
 				}
 
 			}
-			stack[stackIdx + 1].n = m;
-			rsstack[stackIdx + 1] = rsstack[stackIdx] + 1;
+			stack[stackIdx].n = m;
+			rsstack[stackIdx] = rsstack[N] + 1;
 			stackIdx++;
 		}
 	}
@@ -75,9 +78,9 @@ __host__ void unloadDeviceGraph(DeviceGraph *g) {
 
 __host__ DeviceBitset* createBitsetArray(int n) {
 	DeviceBitset *res;
-	cudaMallocManaged(&res, n*sizeof(DeviceBitset));
+	cudaMallocManaged(&res, (n+1)*sizeof(DeviceBitset));
 	char *c;
-	for (int i = 0; i < n; i++) {
+	for (int i = 0; i < n+1; i++) {
 		cudaMallocManaged(&c, (n / 8) + 1);
 		for (int j = 0; j < (n / 8) + 1; j++) c[j] = 0xFF;
 		res[i].contents = c;
