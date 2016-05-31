@@ -15,8 +15,8 @@ int CliqueFinder::RyBKA(int sr, std::set<int> &p) {
 	for (auto &t : p) {
 		np.clear();
 		for (auto &v : p) {
-			if (std::find(graph.vertices[v].neighbourhood.begin(), graph.vertices[v].neighbourhood.end(), t)
-				!= graph.vertices[v].neighbourhood.end()) np.insert(v);
+			if (std::find(graph.vertices[IdsDescriptorArray[v]].neighbourhood.begin(), graph.vertices[IdsDescriptorArray[v]].neighbourhood.end(), t)
+				!= graph.vertices[IdsDescriptorArray[v]].neighbourhood.end()) np.insert(v);
 		}
 		int temp = RyBKA(sr+1, np);
 		if (cmax < temp) cmax = temp;
@@ -105,7 +105,7 @@ bool CliqueFinder::nextGeneration() {
 	selection(newPop);
 	crossOver(newPop, prevPopSize - newPop.size());
 	for (unsigned int i = 0; i < newPop.size(); i++){
-		double z = rand() % RAND_MAX;
+		double z = rand() / RAND_MAX;
 		if (z < pMut){
 			newPop[i].mutate(graph.vertexAmount);
 		}
@@ -123,9 +123,12 @@ bool CliqueFinder::nextGeneration() {
 
 CliqueFinder::CliqueFinder(const Graph &g, const int startAmount, const unsigned int startSize, const int feat,
                            const int desMaxEpoch) {
+	int k = 0;
     for (unsigned int i = 0; i < g.vertices.size(); i++) {
         if (std::find(g.vertices[i].feats.begin(), g.vertices[i].feats.end(), feat) != g.vertices[i].feats.end()) {
             graph.vertices.push_back(g.vertices[i]);
+			IdsDescriptorArray.insert(std::pair<int, int>(g.vertices[i].id, k));
+			k++;
         }
     }
 	graph.vertexAmount = graph.vertices.size();
@@ -171,10 +174,8 @@ Entry CliqueFinder::start() {
 	Organism a;
 	std::vector<int> aVec = randPerm(graph.vertexAmount);
 	a.vertices.insert(aVec.begin(), aVec.end());
-	population.clear();
-	population.push_back(a);
-	getWorthWithCuda(population,dig);
-	retVal.cliqueNumber = population[0].worth;
+
+	retVal.cliqueNumber = getWorth(a);
     return retVal;
 }
 CliqueFinder::~CliqueFinder() {

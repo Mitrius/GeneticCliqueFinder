@@ -5,9 +5,10 @@
 #include "Organism.h"
 #include "Graph.h"
 #include "Entry.h"
+#include <map>
 
-//#define NSAP_MODE_CPU0 //UNCOMMENT FOR CLASSIC CPU MODE
-#define NSAP_MODE_GPU
+#define NSAP_MODE_CPU0 //UNCOMMENT FOR CLASSIC CPU MODE
+//#define NSAP_MODE_GPU
 /*
  * Class representing logic of algorithm
  * All organisms from population represent the same feat
@@ -30,6 +31,7 @@ public:
 
     void selection(std::vector<Organism> &newPop);
 	std::string featName;
+	std::map<int, int> IdsDescriptorArray;
     bool nextGeneration();
     std::vector<Organism> population;
     Graph graph;

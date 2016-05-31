@@ -3,7 +3,7 @@
 
 __host__ __device__ int RyBKA(DeviceBitset *stack, int *map, int *rsstack, int N, const DeviceGraph *graph) {
 	int stackIdx = 1, cmax = -1;
-	while (stackIdx >= 0) {//while stack not empty
+	while (stackIdx > 0) {//while stack not empty
 		stackIdx--; //stack pop
 		if (stack[stackIdx].n == 0) {//if the P set is empty
 			if (cmax < rsstack[stackIdx]) cmax = rsstack[stackIdx]; //check if found clique was greater than the previous one, if so, set
@@ -13,6 +13,7 @@ __host__ __device__ int RyBKA(DeviceBitset *stack, int *map, int *rsstack, int N
 			while (!stack[stackIdx][i]) i++;//that exists in P
 			//now to copy to unofficial N-th bitset
 			for (int j = 0; j < (N / 8) + 1; j++) stack[N].contents[j] = stack[stackIdx].contents[j];
+			rsstack[N] = rsstack[stackIdx];
 			stack[N].n = stack[stackIdx].n;
 			for (int j = 0; j < N; j++) {//push (P \ v)
 				if (stack[N][j] && j != i) stack[stackIdx].set(i, 1);
@@ -112,7 +113,7 @@ __host__ void getWorthWithCuda(std::vector<Organism> &pop, DeviceGraph *g) {
 		cudaMallocManaged(&current, sizeof(DeviceBKInput));
 		current->result = -1;
 		current->g = g;
-		cudaMallocManaged(&current->map, M*sizeof(int));
+		cudaMallocManaged(&current->map, (M+1)*sizeof(int));
 		int j = 0;
 		for (auto &t : pop[i].vertices) current->map[j++] = t;
 		cudaMallocManaged(&current->rsstack, M*sizeof(int));

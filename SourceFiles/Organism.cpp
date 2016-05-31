@@ -7,6 +7,9 @@
  * Value "TRUE" of muType indicates new vertex
  */
 void Organism::mutate(int vertexAmount) {
+	if (vertices.size() == vertexAmount)
+		return;
+
         bool muType = (bool) (rand() % 2);
         if(muType){
             int sizePre = (int) vertices.size();

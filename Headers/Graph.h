@@ -9,7 +9,7 @@
 class Graph {
 public:
     Graph(std::string fileName);
-
+	std::vector<int> IdMap;
     Graph();
     int vertexAmount;
     std::vector<Vertex> vertices;
