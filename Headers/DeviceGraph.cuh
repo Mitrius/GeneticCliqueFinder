@@ -15,7 +15,6 @@ struct DeviceGraph {
 	__host__ __device__ bool isEdge(int v, int t) const {
 		for (int i = 0; i < vertices[v].degree; i++) {
 			if (vertices[v].neighbors[i] == t) return true;
-			else if (vertices[v].neighbors[i] > t) return false;
 		}
 		return false;
 	}
@@ -25,7 +24,7 @@ struct DeviceBitset {
 	int n;
 	char *contents;
 	__host__ __device__ bool operator[](int n);
-	__host__ __device__ void set(int n, bool v);
+	__host__ __device__ void set(int n, char v);
 };
 
 struct DeviceBKInput {

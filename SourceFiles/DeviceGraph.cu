@@ -16,24 +16,20 @@ __host__ __device__ int RyBKA(DeviceBitset *stack, int *map, int *rsstack, int N
 			rsstack[N] = rsstack[stackIdx];
 			stack[N].n = stack[stackIdx].n;
 			for (int j = 0; j < N; j++) {//push (P \ v)
-				if (stack[N][j] && j != i) stack[stackIdx].set(i, 1);
-				else stack[stackIdx].set(i, 0);
+				if (stack[N][j] && j != i) stack[stackIdx].set(j, 1);
+				else stack[stackIdx].set(j, 0);
 			}
 			rsstack[stackIdx] = rsstack[N];
-			stack[stackIdx].n = stack[N].n - 1;
 			stackIdx++;
-			int m = 0;
 			for (int j = 0; j < N; j++) {//for every other vertex
 				if (stack[N][j]) {//that exists, do
 					if (graph->isEdge(map[i], map[j])) {//check for edge by the way of map
 						stack[stackIdx].set(j, 1); //if connected, add to next iteration
-						m++; //also, count
 					}
 					else stack[stackIdx].set(j, 0); //if not, make sure it won't be there.
 				}
-
+				else stack[stackIdx].set(j, 0); //if not, make sure it won't be there.
 			}
-			stack[stackIdx].n = m;
 			rsstack[stackIdx] = rsstack[N] + 1;
 			stackIdx++;
 		}
@@ -64,17 +60,18 @@ __host__ __device__ bool DeviceBitset::operator[](int n) {
 	return (contents[idx] & mask) ? true : false;
 }
 
-__host__ __device__ void DeviceBitset::set(int n, bool v) {
+__host__ __device__ void DeviceBitset::set(int n, char v) {
 	int idx = n / 8;
 	int rem = n % 8;
-	char mask = 1 << rem;
-	if (v) {
-		if (contents[idx] != contents[idx] | mask) n++;
-		contents[idx] = contents[idx] | mask;
-	}
-	else {
-		if (contents[idx] != contents[idx] & ~mask) n--;
+	char mask = 0x1 << rem;
+	char c = contents[idx] & mask;
+	if (c && !v) {
 		contents[idx] = contents[idx] & ~mask;
+		this->n--;
+	}
+	else if (!c && v) {
+		contents[idx] = contents[idx] | mask;
+		this->n++;
 	}
 }
 
