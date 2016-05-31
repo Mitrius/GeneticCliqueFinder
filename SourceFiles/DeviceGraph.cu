@@ -66,8 +66,15 @@ __host__ __device__ bool DeviceBitset::operator[](int n) {
 __host__ __device__ void DeviceBitset::set(int n, bool v) {
 	int idx = n / 8;
 	int rem = n % 8;
-	char mask = (v ? 1 : 0) << rem;
-	contents[idx] = contents[idx] | mask;
+	char mask = 1 << rem;
+	if (v) {
+		if (contents[idx] != contents[idx] | mask) n++;
+		contents[idx] = contents[idx] | mask;
+	}
+	else {
+		if (contents[idx] != contents[idx] & ~mask) n--;
+		contents[idx] = contents[idx] & ~mask;
+	}
 }
 
 __host__ void unloadDeviceGraph(DeviceGraph *g) {
