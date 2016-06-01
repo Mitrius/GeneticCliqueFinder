@@ -123,6 +123,7 @@ bool CliqueFinder::nextGeneration() {
 
 CliqueFinder::CliqueFinder(const Graph &g, const int startAmount, const unsigned int startSize, const int feat,
                            const int desMaxEpoch) {
+	std::cout << "Graf G zaladowany, rozpoczecie filtracji\n";
 	int k = 0;
     for (unsigned int i = 0; i < g.vertices.size(); i++) {
         if (std::find(g.vertices[i].feats.begin(), g.vertices[i].feats.end(), feat) != g.vertices[i].feats.end()) {

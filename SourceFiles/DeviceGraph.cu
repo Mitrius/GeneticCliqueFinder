@@ -84,12 +84,14 @@ __host__ void unloadDeviceGraph(DeviceGraph *g) {
 	cudaFree(g);
 }
 
-__host__ DeviceBitset* createBitsetArray(int n) {
+__host__ DeviceBitset* createBitsetArray(int n, std::vector<void*> &toFree) {
 	DeviceBitset *res;
 	cudaMallocManaged(&res, (n+1)*sizeof(DeviceBitset));
+	toFree.push_back(res);
 	char *c;
 	for (int i = 0; i < n+1; i++) {
 		cudaMallocManaged(&c, (n / 8) + 1);
+		toFree.push_back(c);
 		for (int j = 0; j < (n / 8)+1; j++) c[j] = 0xFF;
 		char mask = 0x7F;
 		for (int j = 0; j < 8-(n % 8); j++) {
@@ -109,27 +111,26 @@ __global__ void getWorthCudaKernel(DeviceBKInput **roadmap) {
 }
 
 __host__ void getWorthWithCuda(std::vector<Organism> &pop, DeviceGraph *g) {
+	std::vector<void*> toFree;
 	int N = pop.size();
-	std::fstream f("log.txt", std::ofstream::app);
-	f << "popSize: " << N <<  '\n';
-	for (int i = 0; i < N; i++){
-		f <<i<<" : "<< pop[i].vertices.size()<<'\n';
-	}
-	f.close();
 	DeviceBKInput **roadmap;
 	cudaMallocManaged(&roadmap, N*sizeof(DeviceBKInput*));
+	toFree.push_back(roadmap);
 	for (int i = 0; i < N; i++) {
 		int M = pop[i].vertices.size();
 		DeviceBKInput *current;
 		cudaMallocManaged(&current, sizeof(DeviceBKInput));
+		toFree.push_back(current);
 		current->result = -1;
 		current->g = g;
-		cudaMallocManaged(&current->map, (M+1)*sizeof(int));
+		cudaMallocManaged(&current->map, (M + 1)*sizeof(int));
+		toFree.push_back(current->map);
 		int j = 0;
 		for (auto &t : pop[i].vertices) current->map[j++] = t;
 		cudaMallocManaged(&current->rsstack, M*sizeof(int));
+		toFree.push_back(current->rsstack);
 		for (int k = 0; k < M; k++) current->rsstack[k] = 0;
-		current->set = createBitsetArray(M);
+		current->set = createBitsetArray(M, toFree);
 		roadmap[i] = current;
 	}
 
@@ -142,16 +143,6 @@ __host__ void getWorthWithCuda(std::vector<Organism> &pop, DeviceGraph *g) {
 	getWorthCudaKernel<<<1, N>>>(roadmap);
 	cudaDeviceSynchronize();
 #endif
-	for (int i = 0; i < N; i++) {
-		size_t f, t;
-		CUresult result = cuMemGetInfo(&f, &t);
-		std::cout << "free: " << f << '\n';
-		pop[i].worth = roadmap[i]->result;
-		cudaFree(roadmap[i]->rsstack);
-		cudaFree(roadmap[i]->map);
-		for (int j = 0; j < roadmap[i]->set->n + 1; j++) cudaFree(roadmap[i]->set[j].contents);
-		cudaFree(roadmap[i]->set);
-		cudaFree(roadmap[i]);
-	}
-	cudaFree(roadmap);
+	for (int i = 0; i < N; i++) pop[i].worth = roadmap[i]->result;
+	for (auto &t : toFree) cudaFree(t);
 }
